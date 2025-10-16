@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StashMate - Simple Inventory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="wrap space" style="padding:10px 16px">
+            <div class="row">
+                <div class="logo">SM</div>
+                <div>
+                    <div style="font-weight: 700">StashMate</div>
+                    <div class="muted">maybe their business name here?</div>
+                </div>
+            </div>
+            <div class="row">
+                <button class="btn" id="exportCsvBtn">Export CSV</button>
+                <button class="btn primary" id="addBtn">+ Add Item</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="wrap" style="padding-top: 16px">
+        <section class="grid cards">
+            <div class="card"><div class="muted">Inventory Value (Cost)</div></div>
+            <div class="card"><div class="muted">Potential Revenue</div></div>
+            <div class="card"><div class="muted">Potential Profit</div></div>
+            <div class="card"><div class="muted">Items in Catalog</div></div>
+        </section>
+
+        <section class="space" style="margin-top:14px;gap:10px;align-items:flex-end">
+            <div class="toolbar" style="flex:1">
+                <input id="searchInput" placeholder="Search name, category, source..." style="flex:1">
+                <select id="sortSelect">
+                    <option value="acquired:desc">Newest</option>
+                    <option value="acquired:asc">Oldest</option>
+                    <option value="name:asc">Name A->Z</option>
+                    <option value="name:desc">Name Z->A</option>
+                    <option value="price:desc">Price High->Low</option>
+                    <option value="price:asc">Price Low->High</option>
+                    <option value="cost:desc">Cost High->Low</option>
+                    <option value="cost:asc">Cost Low->High</option>
+                </select>
+            </div>
+            <div class="muted" id="resultCount">0 results</div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
