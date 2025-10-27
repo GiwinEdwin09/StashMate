@@ -17,19 +17,19 @@
                 </div>
             </div>
             <div class="row">
-                <button class="btn" id="exportCsvBtn">Export CSV</button>
-                <button class="btn primary" id="addBtn">+ Add Item</button>
+                <button class="btn" id="exportCsvBtn" type="button">Export CSV</button>
+                <button class="btn primary" id="addBtn" type="button">+ Add Item</button>
             </div>
         </div>
     </header>
 
     <main class="wrap" style="padding-top: 16px">
         <section class="grid cards">
-            <div class="card"><div class="muted">Inventory Value (Cost)</div></div>
-            <div class="card"><div class="muted">Potential Revenue</div></div>
-            <div class="card"><div class="muted">Potential Profit</div></div>
-            <div class="card"><div class="muted">Items in Catalog</div></div>
-        </section>
+            <div class="card"><div class="muted">Inventory Value (Cost)</div><div id="kpiCost">$0</div></div>
+            <div class="card"><div class="muted">Potential Profit (Unsold)</div><div id="kpiPotential">$0</div></div>
+            <div class="card"><div class="muted">Total Made (Sold)</div><div id="kpiTotalMade">$0</div></div>
+            <div class="card"><div class="muted">Items in Catalog</div><div id="kpiCount">0</div></div>
+          </section>          
 
         <section class="space" style="margin-top:14px;gap:10px;align-items:flex-end">
             <div class="toolbar" style="flex:1">
@@ -47,7 +47,85 @@
             </div>
             <div class="muted" id="resultCount">0 results</div>
         </section>
+
+        <section class="space" style="margin-top:10px; gap:10px; align-items:center">
+            <div class="row" style="gap:8px">
+            <label class="muted">View:</label>
+            <select id="rangeSelect">
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month" selected>Month</option>
+                <option value="year">Year</option>
+                <option value="all">All-time</option>
+            </select>
+            <input id="rangeAnchor" type="date" />
+            </div>
+            <div class="muted">Revenue graph (Sold)</div>
+        </section>
+        
+        <section class="card" style="margin-top:10px">
+            <canvas id="earningsChart" height="180"></canvas>
+        </section>
+        
+
+        <section style="margin-top: 12px" class="tableWrap">
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th><th>Category</th><th>Cond</th><th>Qty</th><th>Cost</th>
+                        <th>Price</th><th>Profit</th><th>Source</th><th>Acquired</th><th>Status</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
     </main>
+
+    <div class="modalBack" id="modalBack">
+        <div class="modal" role="dialog" aria-modal="true">
+            <div class="modalHead space">
+                <div id="modalTitle">New Item</div>
+                <button class="btn" id="closeModal" type="button">x</button>
+            </div>
+            <div class="modalBody">
+                <div class="fields">
+                    <label><span>Name *</span><input id="f_name"></label>
+                  
+                    <label><span>Category</span>
+                      <select id="f_category">
+                        <option>Cards</option><option>Figures</option><option>Sealed</option><option>Other</option>
+                      </select>
+                    </label>
+                  
+                    <label><span>Condition</span>
+                      <select id="f_condition">
+                        <option>NM</option><option>LP</option><option>MP</option><option>HP</option><option>Damaged</option><option>Boxed</option>
+                      </select>
+                    </label>
+                  
+                    <label><span>Quantity</span><input type="number" id="f_qty" min="1" value="1"></label>
+                    <label><span>Cost per Unit</span><input type="number" step="0.01" id="f_cost" value="0"></label>
+                    <label><span>List Price per Unit</span><input type="number" step="0.01" id="f_price" value="0"></label>
+                    <label><span>Source</span><input id="f_source"></label>
+                    <label><span>Acquired</span><input type="date" id="f_acquired"></label>
+                  
+                    <label id="soldOnWrap" style="display:none"><span>Sold On</span><input type="date" id="f_soldOn"></label>
+                  
+                    <label><span>Status</span>
+                      <select id="f_status">
+                        <option>In Stock</option><option>Listed</option><option>On Hold</option><option>Sold</option>
+                      </select>
+                    </label>
+                  </div>                  
+                <div class="muted" id="profitPreview">Profit preview: $0.00</div>
+            </div>
+            <div class="modalFoot">
+                <button class="btn" id="cancelBtn" type="button">Cancel</button>
+                <button class="btn primary" id="saveBtn" type="button">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
