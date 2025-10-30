@@ -2,8 +2,9 @@
 'use client'
 import { supabase } from '@/lib/supabaseClient';
 import Auth from './components/auth';
-import Inventory from './components/Inventory';
+// import InventoryItem from './components/InventoryItem';
 import {useEffect, useState} from 'react'
+import Collection from './components/collections';
 
 function App() {
   const [session, setSession] = useState<any>(null)
@@ -28,7 +29,7 @@ function App() {
   return (
     <>
     {session ? (
-      <><button onClick={logout}> Log Out</button><Inventory/></>
+      <><button onClick={logout}> Log Out</button><Collection/></>
     ): (
       <Auth/>
     )
