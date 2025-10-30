@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
           return cookies
         },
         setAll(cookiesToSet) {
-          console.log('📝 Setting cookies:', cookiesToSet.length)
+          console.log('Setting cookies:', cookiesToSet.length)
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
             supabaseResponse.cookies.set(name, value, options)

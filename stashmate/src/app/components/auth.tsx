@@ -11,6 +11,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+
   const validateForm = () => {
     // Reset previous messages
     setErrorMessage('');
@@ -98,7 +99,6 @@ export default function Auth() {
           setErrorMessage(signInErr.message);
           return;
         }
-        
         // Successfully signed in - no need for a message as the user will be redirected
       }
     } catch (error) {
