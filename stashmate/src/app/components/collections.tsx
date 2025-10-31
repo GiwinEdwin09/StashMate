@@ -1,11 +1,46 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createCollection } from '../actions/collections/createCollection'
+import { supabase } from '@/lib/supabaseClient'
 
-export default function AddCollectionForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+type Collection = {
+  id: number
+  name: string
+  category: string
+  cond: string
+  qty: number
+  cost: number
+  value: number
+  source: number
+  acquired_date: string
+  status: number
+  profit: number
+  owner_id: string
+}
+
+export default function AddCollectionForm({onSelectCollection}: {onSelectCollection: (id: number) => void}) {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const fetchCollections = async () => {
+    setIsLoading(true);
+    const { error: fetchCollectionErr, data } = await supabase.from('collections').select('*').order('name', {ascending: false});
+    if (fetchCollectionErr) {
+      console.error("Error fetching collection:", fetchCollectionErr);
+      setError("Error fetching collection");
+      return;
+    }
+    else {
+      setCollections(data);
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -22,6 +57,7 @@ export default function AddCollectionForm() {
     if (result.success) {
       setSuccess(true)
       form.reset()
+      await fetchCollections()
     } else {
       setError(result.error || 'Failed to create collection')
     }
@@ -30,9 +66,9 @@ export default function AddCollectionForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
+    <div className="max-w-md mx-auto p-6 bg-black rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Create New Collection</h2>
-
+      {/*Collection Form*/}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -84,6 +120,33 @@ export default function AddCollectionForm() {
           {isLoading ? 'Creating...' : 'Create Collection'}
         </button>
       </form>
+
+      {/*Display Collections*/}
+      <h3 className="text-lg font-semibold mb-2 mt-8">Collections</h3>
+
+      {isLoading 
+        ? "Loading..."
+        : collections.length === 0 
+          ? "No collections yet." 
+          : (
+          <ul className="space-y-2">
+            {collections.map((col) => (
+              <li
+                key={col.id}
+                className="flex justify-between items-center border p-3 rounded-md hover:bg-gray-100 transition cursor-pointer"
+                onClick={() => onSelectCollection(col.id)} 
+              >
+                <div>
+                  <p className="font-medium">{col.name}</p>
+                  <p className="text-sm text-gray-500">{col.category}</p>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date().toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+      )}
     </div>
   )
 }

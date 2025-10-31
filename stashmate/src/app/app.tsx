@@ -46,10 +46,12 @@
 import Auth from './components/auth';
 import { useEffect, useState } from 'react'
 import Collection from './components/collections';
+import Inventory from './components/InventoryItem';
 import { createBrowserClient } from '@supabase/ssr'  // ← Change this
 
 function App() {
   const [session, setSession] = useState<any>(null)
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null)
   
   // ✅ Create SSR browser client
   const supabase = createBrowserClient(
@@ -78,12 +80,30 @@ function App() {
     setSession(null)
   }
 
+  const handleSelectCollection = (id: number) => {
+    setSelectedCollectionId(id)
+  }
+
+  const handleBack = () => {
+    setSelectedCollectionId(null)
+  }
+
   return (
     <>
       {session ? (
         <>
           <button onClick={logout}>Log Out</button>
-          <Collection />
+          {selectedCollectionId 
+            ? (
+              <div>
+                <button onClick={handleBack}>
+                  Back to Collections
+                </button>
+                <Inventory collectionId={selectedCollectionId}/>
+              </div>
+            )
+            : <Collection onSelectCollection={handleSelectCollection}/>
+          }
         </>
       ) : (
         <Auth />
