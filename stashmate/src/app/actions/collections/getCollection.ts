@@ -2,7 +2,6 @@
 import { createClient } from '@/lib/server'
 
 export async function getCollections() {
-  
   const supabase = await createClient()
   
   const { data: { user }, error: authError } = await supabase.auth.getUser()

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createCollection } from '../actions/collections/createCollection'
 import { supabase } from '@/lib/supabaseClient'
 import { getCollections } from '../actions/collections/getCollection'
+import { deleteCollection } from '../actions/collections/deleteCollection'
 
 type Collection = {
   id: number
@@ -24,6 +25,7 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchCollections = async () => {
     setIsLoading(true);
@@ -64,6 +66,27 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
 
     setIsLoading(false)
   }
+  async function handleDelete(e: React.MouseEvent, id: number) {
+    e.stopPropagation();
+    
+    if (!confirm('Are you sure you want to delete this collection?')) {
+      return;
+    }
+
+    setDeletingId(id);
+    setError('');
+
+    const result = await deleteCollection(id);
+
+    if (result.success) {
+      await fetchCollections();
+    } else {
+      setError(result.error || 'Failed to delete collection');
+    }
+
+    setDeletingId(null);
+  }
+  
 
   return (
     <div className="max-w-md mx-auto p-6 bg-black rounded-lg shadow">
@@ -132,17 +155,26 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
           <ul className="space-y-2">
             {collections.map((col) => (
               <li
-                key={col.id}
-                className="flex justify-between items-center border p-3 rounded-md hover:bg-gray-100 transition cursor-pointer"
-                onClick={() => onSelectCollection(col.id)} 
+              key={col.id}
+              className="flex justify-between items-center border border-gray-600 p-3 rounded-md hover:bg-gray-800 transition cursor-pointer"
+              onClick={() => onSelectCollection(col.id)} 
               >
-                <div>
-                  <p className="font-medium">{col.name}</p>
-                  <p className="text-sm text-gray-500">{col.category}</p>
+                <div className="flex-1 min-w-0"> 
+                  <p className="font-medium text-white">{col.name}</p>
+                  <p className="text-sm text-gray-400">{col.category}</p>
                 </div>
-                <span className="text-xs text-gray-400">
-                  {new Date().toLocaleString()}
-                </span>
+                <div className="flex items-center gap-2 flex-shrink-0"> 
+                  <span className="text-xs text-gray-400 whitespace-nowrap"> 
+                    {new Date(col.acquired_date).toLocaleDateString()}
+                  </span>
+                  <button
+                    onClick={(e) => handleDelete(e, col.id)}
+                    disabled={deletingId === col.id}
+                    className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                  >
+                    {deletingId === col.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
