@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createCollection } from '../actions/collections/createCollection'
 import { supabase } from '@/lib/supabaseClient'
+import { getCollections } from '../actions/collections/getCollection'
 
 type Collection = {
   id: number
@@ -26,18 +27,17 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
 
   const fetchCollections = async () => {
     setIsLoading(true);
-    const { error: fetchCollectionErr, data } = await supabase.from('collections').select('*').order('name', {ascending: false});
-    if (fetchCollectionErr) {
-      console.error("Error fetching collection:", fetchCollectionErr);
+    const result = await getCollections();
+    
+    if (result.error) {
+      console.error("Error fetching collection:", result.error);
       setError("Error fetching collection");
-      return;
+    } else if (result.data) {
+      setCollections(result.data);
     }
-    else {
-      setCollections(data);
-    }
+    
     setIsLoading(false);
   }
-
   useEffect(() => {
     fetchCollections();
   }, []);
