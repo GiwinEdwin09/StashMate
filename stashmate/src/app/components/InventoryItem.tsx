@@ -3,6 +3,7 @@
 import { useState, useEffect} from 'react';
 import { createItem } from '../actions/items/createItem'
 import { deleteItem } from '../actions/items/deleteItem'
+import { updateItem } from '../actions/items/updateItem'
 import { supabase } from "@/lib/supabaseClient";
 import './style.css';
 
@@ -25,6 +26,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   // Fetch Items
   const fetchItems = async () => {
@@ -56,35 +58,56 @@ export default function Inventory({collectionId}: {collectionId: number}) {
     const formData = new FormData(e.currentTarget)
     const form = e.currentTarget
 
-    const result = await createItem(formData)
-
-    if (result.success) {
-      setSuccess(true)
-      form.reset()
-      await fetchItems()
+    if (editingItem) {
+      const result = await updateItem(formData)
+      if (result) {
+        setSuccess(true)
+        form.reset()
+        setEditingItem(null)
+        await fetchItems()
+      } else {
+        setErrorMessage('Failed to update item')
+      }
     } else {
-      setErrorMessage(result.error || 'Failed to create item')
+      const result = await createItem(formData)
+      if (result.success) {
+        setSuccess(true)
+        form.reset()
+        await fetchItems()
+      } else {
+        setErrorMessage(result.error || 'Failed to create item')
+      }
     }
 
     setIsLoading(false)
   }
 
   async function handleDelete(itemId: number) {
-  if (!confirm('Are you sure you want to delete this item?')) {
-    return;
+    if (!confirm('Are you sure you want to delete this item?')) {
+      return;
+    }
+
+    setIsLoading(true);
+    const result = await deleteItem(itemId);
+
+    if (result.success) {
+      await fetchItems();
+    } else {
+      setErrorMessage(result.error || 'Failed to delete item');
+    }
+
+    setIsLoading(false);
   }
 
-  setIsLoading(true);
-  const result = await deleteItem(itemId);
-
-  if (result.success) {
-    await fetchItems();
-  } else {
-    setErrorMessage(result.error || 'Failed to delete item');
+  function handleEdit(item: Item) {
+    setEditingItem(item);
+    setErrorMessage('');
   }
 
-  setIsLoading(false);
-}
+  function handleCancelEdit() {
+    setEditingItem(null);
+    setErrorMessage('');
+  }
 
   return (
     <div>
@@ -128,8 +151,19 @@ export default function Inventory({collectionId}: {collectionId: number}) {
                       <td>{item.created_at}</td>
                       <td>{item.status}</td>
                       <td>
-                        {/* <button onClick={() => onEdit(item)}>Edit</button> */}
-                        <button onClick={() => handleDelete(item.id)}>Delete</button>
+                        <button 
+                          onClick={() => handleEdit(item)}
+                          disabled={isLoading}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item.id)}
+                          disabled={isLoading}
+                          style={{ marginLeft: '8px' }}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -142,64 +176,99 @@ export default function Inventory({collectionId}: {collectionId: number}) {
 
       {/* Form */}
       <form onSubmit={handleSubmit}>
+        <h3>{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
+        
+        {editingItem && (
+          <input
+            type="hidden"
+            name="id"
+            value={editingItem.id}
+          />
+        )}
+        
         <input
           type="hidden"
           name="collection_id"
           value={collectionId}
         />
+        
         <input
           name="name"
           type="text"
           placeholder="Name"
+          defaultValue={editingItem?.name || ''}
           required
           disabled={isLoading}
         />
+        
         <input
           name="condition"
           placeholder="Condition"
+          defaultValue={editingItem?.condition || ''}
         />
+        
         <input
           name="cost"
           type="number"
           placeholder="Cost"
+          defaultValue={editingItem?.cost || ''}
         />
+        
         <input
           name="price"
           type="number"
           placeholder="Price"
+          defaultValue={editingItem?.price || ''}
         />
+        
+        <input
+          name="profit"
+          type="number"
+          placeholder="Profit"
+          defaultValue={editingItem?.profit || ''}
+        />
+        
         <input
           name="source"
           placeholder="Source"
+          defaultValue={editingItem?.source || ''}
         />
+        
         <input
           name="created_at"
           type="date"
+          defaultValue={editingItem?.created_at || ''}
         />
+        
         <select
           name="status"
-          defaultValue="0"
+          defaultValue={editingItem?.status || "0"}
         >
           <option value={0}>Listed</option>
           <option value={1}>In Stock</option>
           <option value={2}>Sold</option>
         </select>
+        
         <button
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? 'Adding...' : 'Add Item'}
+          {isLoading ? 'Saving....' : (editingItem ? 'Update Item' : 'Add Item')}
         </button>
-        {/*</div>{editingItem && (
+        
+        {editingItem && (
           <button
             type="button"
-            onClick={() => setEditingItem(null)}
+            onClick={handleCancelEdit}
+            disabled={isLoading}
+            style={{ marginLeft: '8px' }}
           >
             Cancel
           </button>
-        )}*/}
+        )}
       </form>
 
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   )
 }

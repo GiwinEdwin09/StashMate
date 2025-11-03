@@ -1,13 +1,11 @@
 'use server'
-
-import { supabase } from '@/lib/supabaseClient'
 import type { TablesUpdate } from '../../types/schema'
-
+import { createClient } from '@/lib/server'
 
 export async function updateItem(formData: FormData) {
     const id = Number(formData.get('id'))
     const name = formData.get('name') as string | null
-    const cond = formData.get('cond') as string | null
+    const condition = formData.get('condition') as string | null
     const cost = Number(formData.get('cost'))
     const price = Number(formData.get('price'))
     const profit = Number(formData.get('profit'))
@@ -16,34 +14,23 @@ export async function updateItem(formData: FormData) {
     const created_at = formData.get('created_at') as string
     const collection_id = Number(formData.get('collection_id'))
 
+    const supabase = await createClient()
+    
+    const response = await supabase.auth.getUser()
+    const info = response.data
+    const user = info.user
+
+    if (!user) {
+      throw new Error('You must be logged in')
+    }
+
     if (!name || name.trim().length === 0) {
-      throw new Error('Collection name is required')
+      throw new Error('Item name is required')
     }
-
-    if (!source || source.trim().length === 0) {
-      throw new Error('Source is required')
-    }
-
-    if (isNaN(cost) || cost < 0) {
-      throw new Error('Cost must be a valid positive number')
-    }
-    if (isNaN(price) || price < 0) {
-      throw new Error('Price must be a valid positive number')
-    }
-
-    if (isNaN(collection_id) || collection_id <= 0) {
-      throw new Error('Valid collection ID is required')
-    }
-
-    if (!created_at) {
-      throw new Error('created date is required')
-    }
-
-    // const profit = value - cost
     
     const updateData: TablesUpdate<'items'> = {
-      name: name?.trim() || null,
-      condition: cond?.trim() || null,
+      name: name.trim(),
+      condition: condition?.trim() || null,
       cost: cost,
       price: price,
       profit: profit,
@@ -60,7 +47,9 @@ export async function updateItem(formData: FormData) {
       .select()
       .single()
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      throw new Error(error.message)
+    }
+    
     return data
-
 }
