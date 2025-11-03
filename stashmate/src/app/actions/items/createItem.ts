@@ -1,5 +1,5 @@
 'use server'
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/server'
 
 export async function createItem(formData: FormData) {
   const name = formData.get('name') as string
@@ -10,6 +10,16 @@ export async function createItem(formData: FormData) {
   const source = formData.get('source') as string
   const status = formData.get('status') as string
   const collectionId = Number(formData.get('collection_id'))
+  
+  const supabase = await createClient()
+  
+  const response = await supabase.auth.getUser()
+  const info = response.data
+  const user = info.user
+  
+  if (!user) {
+    return { success: false, error: 'You must be logged in' }
+  }
 
   const insertData = {
     name: name,
