@@ -2,10 +2,12 @@
 
 import { useState, useEffect} from 'react';
 import { createItem } from '../actions/items/createItem'
+import { deleteItem } from '../actions/items/deleteItem'
 import { supabase } from "@/lib/supabaseClient";
 import './style.css';
 
 type Item = {
+  id: number
   name: string;
   condition: string;
   cost: number;
@@ -67,6 +69,23 @@ export default function Inventory({collectionId}: {collectionId: number}) {
     setIsLoading(false)
   }
 
+  async function handleDelete(itemId: number) {
+  if (!confirm('Are you sure you want to delete this item?')) {
+    return;
+  }
+
+  setIsLoading(true);
+  const result = await deleteItem(itemId);
+
+  if (result.success) {
+    await fetchItems();
+  } else {
+    setErrorMessage(result.error || 'Failed to delete item');
+  }
+
+  setIsLoading(false);
+}
+
   return (
     <div>
       <h2>Inventory</h2>
@@ -99,7 +118,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
                 )
                 : (
                   items.map((item) => (
-                    <tr key={item.name}>
+                    <tr key={item.id}>
                       <td>{item.name}</td>
                       <td>{item.condition}</td>
                       <td>${item.cost}</td>
@@ -108,10 +127,10 @@ export default function Inventory({collectionId}: {collectionId: number}) {
                       <td>{item.source}</td>
                       <td>{item.created_at}</td>
                       <td>{item.status}</td>
-                      {/*<td>
-                        <button onClick={() => onEdit(item)}>Edit</button>
-                        <button onClick={() => onDelete(item.id)}>Delete</button>
-                      </td>*/}
+                      <td>
+                        {/* <button onClick={() => onEdit(item)}>Edit</button> */}
+                        <button onClick={() => handleDelete(item.id)}>Delete</button>
+                      </td>
                     </tr>
                   ))
                 )

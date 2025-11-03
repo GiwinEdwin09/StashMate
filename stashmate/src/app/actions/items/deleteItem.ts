@@ -1,15 +1,32 @@
 'use server'
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/server'
 
-export async function deleteItem(formData: FormData) {
-    const name = formData.get('name') as string
+export async function deleteItem(id: number) {
+    console.log('Attempting to delete item with id:', id)
+    
+    const supabase = await createClient()
+    
+    const response = await supabase.auth.getUser()
+    const info = response.data
+    const user = info.user
+    
+    console.log('User:', user?.id)
+    
+    if (!user) {
+        console.log('No user found')
+        return { success: false, error: 'You must be logged in' }
+    }
 
-    const { data, error } = await supabase
-    .from('items')
-    .delete()
-    .eq('name', name)
-    .select()
+    const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id)
 
-    if (error) throw new Error(error.message)
-    return data
+    if (error) {
+        console.log('Delete error:', error)
+        return { success: false, error: error.message }
+    }
+    
+    console.log('Delete successful')
+    return { success: true }
 }
