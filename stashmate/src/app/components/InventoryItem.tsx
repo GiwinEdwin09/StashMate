@@ -15,7 +15,7 @@ type Item = {
   price: number;
   profit: number;
   source: string;
-  status: string;
+  status: number; // Changed from string to number
   created_at: string;
   collection_id: number
 };
@@ -27,6 +27,20 @@ export default function Inventory({collectionId}: {collectionId: number}) {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+
+  // Status mapping function
+  const getStatusText = (status: number): string => {
+    switch (status) {
+      case 0:
+        return 'Listed';
+      case 1:
+        return 'In Stock';
+      case 2:
+        return 'Sold';
+      default:
+        return 'Unknown';
+    }
+  };
 
   // Fetch Items
   const fetchItems = async () => {
@@ -149,7 +163,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
                       <td>${item.profit}</td>
                       <td>{item.source}</td>
                       <td>{item.created_at}</td>
-                      <td>{item.status}</td>
+                      <td>{getStatusText(item.status)}</td>
                       <td>
                         <button 
                           onClick={() => handleEdit(item)}
