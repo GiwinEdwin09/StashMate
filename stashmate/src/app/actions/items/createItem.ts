@@ -9,6 +9,7 @@ export async function createItem(formData: FormData) {
   const profit = price - cost
   const source = formData.get('source') as string
   const status = formData.get('status') as string
+  const created_at = formData.get('created_at') as string
   const collectionId = Number(formData.get('collection_id'))
   
   const supabase = await createClient()
@@ -29,7 +30,7 @@ export async function createItem(formData: FormData) {
     profit: profit,
     source: source,
     status: status,
-    created_at: new Date().toISOString().split('T')[0],
+    created_at: created_at || new Date().toISOString().split('T')[0],
     collection_id: collectionId
   }
 
