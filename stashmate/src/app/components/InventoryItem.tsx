@@ -4,6 +4,7 @@ import { useState, useEffect} from 'react';
 import { createItem } from '../actions/items/createItem'
 import { deleteItem } from '../actions/items/deleteItem'
 import { updateItem } from '../actions/items/updateItem'
+import { sortItems } from '../actions/items/sortItems'
 import { supabase } from "@/lib/supabaseClient";
 import './style.css';
 
@@ -27,6 +28,8 @@ export default function Inventory({collectionId}: {collectionId: number}) {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'profit' | 'source' | 'status' | 'created_at' | 'condition' | 'cost'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Status mapping function
   const getStatusText = (status: number): string => {
@@ -42,24 +45,71 @@ export default function Inventory({collectionId}: {collectionId: number}) {
     }
   };
 
-  // Fetch Items
+  // Fetch Items with sorting
   const fetchItems = async () => {
     setIsLoading(true);
-    const { error: fetchItemErr, data } = await supabase.from('items').select('*').eq('collection_id', collectionId);
-    if (fetchItemErr) {
-      console.error("Error fetching items");
-      setErrorMessage("Error fetching items");
-      return;
+    setErrorMessage(''); // Clear previous errors
+    
+    try {
+      // First try direct database query which we know works
+      console.log('Fetching items directly from database...');
+      const { error: fetchItemErr, data } = await supabase.from('items').select('*').eq('collection_id', collectionId);
+      
+      if (fetchItemErr) {
+        console.error("Direct fetch error:", fetchItemErr);
+        setErrorMessage("Error loading items");
+        setItems([]);
+      } else {
+        console.log('Direct fetch successful:', data.length, 'items');
+        
+        // Sort the data locally instead of using the server action
+        const sortedData = [...data].sort((a, b) => {
+          let aValue = a[sortBy];
+          let bValue = b[sortBy];
+          
+          // Handle different data types
+          if (typeof aValue === 'string') {
+            aValue = aValue.toLowerCase();
+            bValue = bValue.toLowerCase();
+          }
+          
+          if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+          if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
+        
+        setItems(sortedData);
+        console.log('Items sorted locally:', sortedData.length, 'items');
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setErrorMessage("Error loading items");
+      setItems([]);
     }
-    else {
-      setItems(data);
-    }
+    
     setIsLoading(false);
   };
 
   useEffect(() => {
     fetchItems();
   }, [collectionId]);
+
+  // Re-fetch when sorting changes
+  useEffect(() => {
+    fetchItems();
+  }, [sortBy, sortOrder]);
+
+  // Handle sorting
+  const handleSort = (field: typeof sortBy) => {
+    if (field === sortBy) {
+      // If clicking the same field, toggle order
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // If clicking different field, set new field and default to ascending
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -127,6 +177,45 @@ export default function Inventory({collectionId}: {collectionId: number}) {
     <div>
       <h2>Inventory</h2>
 
+      {/* Sort Controls */}
+      <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Sort by:</span>
+        {[
+          { key: 'name', label: 'Name' },
+          { key: 'condition', label: 'Condition' },
+          { key: 'cost', label: 'Cost' },
+          { key: 'price', label: 'Price' },
+          { key: 'profit', label: 'Profit' },
+          { key: 'source', label: 'Source' },
+          { key: 'created_at', label: 'Date' },
+          { key: 'status', label: 'Status' }
+        ].map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => handleSort(key as typeof sortBy)}
+            style={{
+              padding: '4px 8px',
+              fontSize: '12px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              background: sortBy === key ? '#007acc' : '#f8f8f8',
+              color: sortBy === key ? 'white' : '#333',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {label}
+            {sortBy === key && (
+              <span style={{ fontSize: '10px' }}>
+                {sortOrder === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Table */}
       {isLoading 
         ? "Loading..." 
@@ -135,14 +224,54 @@ export default function Inventory({collectionId}: {collectionId: number}) {
           <table id="itemsTable">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Condition</th>
-                <th>Cost</th>
-                <th>Price</th>
-                <th>Profit</th>
-                <th>Source</th>
-                <th>Date</th>
-                <th>Status</th>
+                <th 
+                  onClick={() => handleSort('name')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('condition')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Condition {sortBy === 'condition' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('cost')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Cost {sortBy === 'cost' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('price')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Price {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('profit')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Profit {sortBy === 'profit' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('source')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Source {sortBy === 'source' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('created_at')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Date {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  onClick={() => handleSort('status')}
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  Status {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
