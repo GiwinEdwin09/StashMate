@@ -8,7 +8,7 @@ export async function createItem(formData: FormData) {
   const price = Number(formData.get('price'))
   const profit = price - cost
   const source = formData.get('source') as string
-  const status = formData.get('status') as string
+  const status = Number(formData.get('status'));
   const collectionId = Number(formData.get('collection_id'))
   
   const supabase = await createClient()

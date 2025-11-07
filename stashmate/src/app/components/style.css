@@ -32,14 +32,7 @@
   }
   
   .grid{ display:grid; gap:12px; }
-  
-  /* Components */
-  .logo{
-    width:36px; height:36px; border-radius:12px;
-    background:var(--brand);
-    display:grid; place-items:center;
-    color:#001b08; font-weight:800;
-  }
+
   
   .btn{
     border:1px solid var(--border);
@@ -189,3 +182,161 @@ canvas { width:100%; display:block; }
     display: block;
 }
   
+/* Navbar Styling */
+header.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background-color: #111;
+  border-bottom: 2px solid #333;
+}
+
+.navbar-logo {
+  background-color: #22c55e;
+  padding: 12px 24px;
+  border-radius: 8px;
+  min-width: 160px; 
+  display: inline-block; 
+}
+
+.navbar-logo a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Button Styles */
+.navbar-export-btn,
+.navbar-add-item-btn,
+.navbar-dropdown-btn {
+  padding: 10px 20px; 
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-export-btn {
+  background-color: #34d399; 
+}
+
+.navbar-export-btn:hover {
+  background-color: #16a34a; 
+}
+
+.navbar-add-item-btn {
+  background-color: #10b981; 
+}
+
+.navbar-add-item-btn:hover {
+  background-color: #059669; 
+}
+
+/* Dropdown Menu */
+.navbar-dropdown {
+  position: relative;
+}
+
+.navbar-dropdown-btn {
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  padding: 8px 16px; 
+  font-size: 18px; 
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-dropdown-icon {
+  font-size: 20px; 
+  display: inline-block;
+}
+
+.navbar-dropdown-content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #222;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 150px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.navbar-dropdown-content a,
+.navbar-dropdown-content button {
+  color: #fff;
+  padding: 10px 16px;
+  text-align: left;
+  background-color: #222;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-dropdown-content a:hover,
+.navbar-dropdown-content button:hover {
+  background-color: #34d399; 
+}
+
+/* Hide Export CSV and Add Item buttons if no collection is selected */
+.navbar-export-btn,
+.navbar-add-item-btn {
+  display: none;
+}
+
+.navbar-export-btn.show,
+.navbar-add-item-btn.show {
+  display: inline-block; /* Show buttons when collection is selected */
+}
+
+
+/* Payment Method column in the table */
+table th,
+table td {
+  padding: 10px;
+  border: 1px solid var(--border);
+}
+
+table th {
+  background-color: #0e0e11;
+  color: var(--text);
+  font-weight: bold;
+}
+
+table td {
+  background-color: #1b1b1f;
+  color: var(--text);
+}
+
+table td select {
+  background: #121218;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: 10px;
+  width: 100%;
+}
+
+/* Add extra padding to the Payment Method column */
+table td:nth-child(9), 
+table th:nth-child(9) {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+

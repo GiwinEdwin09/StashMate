@@ -4,6 +4,7 @@ import { createCollection } from '../actions/collections/createCollection'
 import { supabase } from '@/lib/supabaseClient'
 import { getCollections } from '../actions/collections/getCollection'
 import { deleteCollection } from '../actions/collections/deleteCollection'
+import { createItem } from '../actions/items/createItem'
 
 type Collection = {
   id: number
@@ -87,6 +88,58 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
     setDeletingId(null);
   }
   
+  const [newItem, setNewItem] = useState({
+    name: '',
+    condition: '',
+    cost: 0,
+    price: 0,
+    profit: 0,
+    source: '',
+    collectionId: 0,
+  });
+
+  const handleItemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewItem((prevItem) => ({
+      ...prevItem,
+      [name]: value,
+    }));
+  };
+
+const handleItemSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (newItem.name && newItem.condition && newItem.cost && newItem.price) {
+    // Convert newItem to FormData
+    const formData = new FormData();  // Correctly instantiate FormData
+    formData.append('name', newItem.name);
+    formData.append('condition', newItem.condition);
+    formData.append('cost', newItem.cost.toString());  // Convert numbers to string for FormData
+    formData.append('price', newItem.price.toString());
+    formData.append('profit', newItem.profit.toString());
+    formData.append('source', newItem.source);
+    formData.append('collectionId', newItem.collectionId.toString());  // Assuming collectionId is passed
+
+    // Call the createItem function with the FormData
+    const result = await createItem(formData);
+
+    if (result.success) {
+      setSuccess(true);
+      setNewItem({
+        name: '',
+        condition: '',
+        cost: 0,
+        price: 0,
+        profit: 0,
+        source: '',
+        collectionId: 0,
+      });
+      await fetchCollections(); // Fetch collections again after successful addition
+    } else {
+      setError(result.error || 'Failed to add item');
+    }
+  }
+};
 
   return (
     <div className="max-w-md mx-auto p-6 bg-black rounded-lg shadow">
