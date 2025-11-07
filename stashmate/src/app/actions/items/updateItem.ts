@@ -8,7 +8,7 @@ export async function updateItem(formData: FormData) {
     const condition = formData.get('condition') as string | null
     const cost = Number(formData.get('cost'))
     const price = Number(formData.get('price'))
-    const profit = price-cost
+    const profit = Number(formData.get('profit'))
     const source = formData.get('source') as string
     const status = Number(formData.get('status'))
     const created_at = formData.get('created_at') as string

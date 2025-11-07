@@ -23,13 +23,10 @@ type Item = {
 
 export default function Inventory({collectionId}: {collectionId: number}) {
   const [errorMessage, setErrorMessage] = useState('');
-  const [success, setSuccess] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
-  const [inventoryValue, setInventoryValue] = useState(0);
-  const [potentialProfit, setPotentialProfit] = useState(0);
-  const [totalProfit, setTotalProfit] = useState(0);
 
   // Status mapping function
   const getStatusText = (status: number): string => {
@@ -56,11 +53,6 @@ export default function Inventory({collectionId}: {collectionId: number}) {
     }
     else {
       setItems(data);
-      setInventoryValue(data.reduce((sum, item) => sum + (item.cost || 0), 0));
-      const unsoldItems = data.filter(item => item.status !== 2);
-      const soldItems = data.filter(item => item.status === 2);
-      setPotentialProfit(unsoldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
-      setTotalProfit(soldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
     }
     setIsLoading(false);
   };
@@ -134,37 +126,6 @@ export default function Inventory({collectionId}: {collectionId: number}) {
   return (
     <div>
       <h2>Inventory</h2>
-
-      {/* Statistics */}
-      <div className="flex gap-4">
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Items in Catalog
-          </label>
-          <p className="text-base font-semibold">{items.length}</p>
-        </div>
-
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Inventory Value (Cost)
-          </label>
-          <p className="text-base font-semibold">${inventoryValue.toFixed(2)}</p>
-        </div>
-
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Potential Profit (Unsold)
-          </label>
-          <p className="text-base font-semibold">${potentialProfit.toFixed(2)}</p>
-        </div>
-
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Total Profit
-          </label>
-          <p className="text-base font-semibold">${totalProfit.toFixed(2)}</p>
-        </div>
-      </div>
 
       {/* Table */}
       {isLoading 
@@ -272,6 +233,13 @@ export default function Inventory({collectionId}: {collectionId: number}) {
           type="number"
           placeholder="Price"
           defaultValue={editingItem?.price || ''}
+        />
+        
+        <input
+          name="profit"
+          type="number"
+          placeholder="Profit"
+          defaultValue={editingItem?.profit || ''}
         />
         
         <input
