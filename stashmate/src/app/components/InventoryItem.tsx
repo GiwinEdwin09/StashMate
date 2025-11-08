@@ -174,6 +174,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
           <table id="itemsTable">
             <thead>
               <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Condition</th>
                 <th>Cost</th>
@@ -190,12 +191,24 @@ export default function Inventory({collectionId}: {collectionId: number}) {
               {items.length === 0
                 ? (
                   <tr>
-                    <td colSpan={10}>No items found</td>
+                    <td colSpan={11}>No items found</td>
                   </tr>
                 )
                 : (
                   items.map((item) => (
                     <tr key={item.id}>
+                      <td>
+                        <img 
+                          src="/default-item.svg" 
+                          alt={item.name}
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            objectFit: 'cover',
+                            borderRadius: '4px'
+                          }}
+                        />
+                      </td>
                       <td>{item.name}</td>
                       <td>{item.condition}</td>
                       <td>${item.cost}</td>
