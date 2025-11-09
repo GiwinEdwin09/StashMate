@@ -99,9 +99,11 @@ export type Database = {
           cost: number
           created_at: string
           id: number
+          image_url: string | null
           name: string | null
           price: number
           profit: number
+          quantity: number | null
           source: string
           status: number
         }
@@ -111,9 +113,11 @@ export type Database = {
           cost: number
           created_at: string
           id?: number
+          image_url?: string | null
           name?: string | null
           price: number
           profit: number
+          quantity?: number | null
           source: string
           status: number
         }
@@ -123,9 +127,11 @@ export type Database = {
           cost?: number
           created_at?: string
           id?: number
+          image_url?: string | null
           name?: string | null
           price?: number
           profit?: number
+          quantity?: number | null
           source?: string
           status?: number
         }
@@ -162,7 +168,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      debug_session: { Args: never; Returns: Json }
+      get_current_role: { Args: never; Returns: string }
+      log_uid: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -13,6 +13,7 @@ export async function updateItem(formData: FormData) {
     const status = Number(formData.get('status'))
     const created_at = formData.get('created_at') as string
     const collection_id = Number(formData.get('collection_id'))
+    const image_url = formData.get('image_url') as string
 
     const supabase = await createClient()
     
@@ -37,7 +38,8 @@ export async function updateItem(formData: FormData) {
       source: source.trim(),
       status: status,
       created_at: created_at,
-      collection_id: collection_id
+      collection_id: collection_id,
+      image_url: image_url
     }
 
     const { data, error } = await supabase

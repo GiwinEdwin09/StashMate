@@ -17,7 +17,8 @@ type Item = {
   source: string;
   status: number; // Changed from string to number
   created_at: string;
-  collection_id: number
+  collection_id: number;
+  image_url?: string;
 };
 
 
@@ -199,7 +200,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
                     <tr key={item.id}>
                       <td>
                         <img 
-                          src="/default-item.svg" 
+                          src={item.image_url || '/default-item.svg'}
                           alt={item.name}
                           style={{
                             width: '40px',

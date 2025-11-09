@@ -10,6 +10,8 @@ export async function createItem(formData: FormData) {
   const source = formData.get('source') as string
   const status = Number(formData.get('status'));
   const collectionId = Number(formData.get('collection_id'))
+  const image_url = formData.get('image_url') as string
+  const created_at = formData.get('created_at') as string
   
   const supabase = await createClient()
   
@@ -29,8 +31,9 @@ export async function createItem(formData: FormData) {
     profit: profit,
     source: source,
     status: status,
-    created_at: new Date().toISOString().split('T')[0],
-    collection_id: collectionId
+    created_at: created_at || new Date().toISOString().split('T')[0],
+    collection_id: collectionId,
+    image_url: image_url
   }
 
   console.log('Attempting insert')
