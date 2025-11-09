@@ -10,7 +10,7 @@ export async function createItem(formData: FormData) {
   const source = formData.get('source') as string
   const status = Number(formData.get('status'));
   const collectionId = Number(formData.get('collection_id'))
-  const image_url = formData.get('image_url') as string
+  const imageFile = formData.get('image_url') as File
   const created_at = formData.get('created_at') as string
   
   const supabase = await createClient()
@@ -23,6 +23,31 @@ export async function createItem(formData: FormData) {
     return { success: false, error: 'You must be logged in' }
   }
 
+  let image_url = ''
+
+  if (imageFile && imageFile.size > 0) {
+    const fileExt = imageFile.name.split('.').pop()
+    const fileName = `${user.id}/${Date.now()}.${fileExt}`
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('item-images')
+      .upload(fileName, imageFile, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError)
+      return { success: false, error: 'Failed to upload image: ' + uploadError.message }
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('item-images')
+      .getPublicUrl(fileName)
+    
+    image_url = publicUrl
+  }
+
   const insertData = {
     name: name,
     condition: condition,
@@ -33,7 +58,7 @@ export async function createItem(formData: FormData) {
     status: status,
     created_at: created_at || new Date().toISOString().split('T')[0],
     collection_id: collectionId,
-    image_url: image_url
+    image_url: image_url || null
   }
 
   console.log('Attempting insert')

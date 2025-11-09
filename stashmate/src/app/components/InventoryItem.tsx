@@ -267,6 +267,29 @@ export default function Inventory({collectionId}: {collectionId: number}) {
           name="collection_id"
           value={collectionId}
         />
+
+        <label 
+          htmlFor="image_url_input"
+          style={{
+            display: 'inline-block',
+            padding: '8px 16px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            textAlign: 'center'
+          }}
+        >
+          Upload Image
+        </label>
+        <input
+          name="image_url"
+          type="file"
+          accept="image/jpg, image/jpeg, image/png"
+          id="image_url_input"
+          style={{ display: 'none' }}
+          defaultValue={editingItem?.name || ''}
+        />
         
         <input
           name="name"

@@ -13,7 +13,7 @@ export async function updateItem(formData: FormData) {
     const status = Number(formData.get('status'))
     const created_at = formData.get('created_at') as string
     const collection_id = Number(formData.get('collection_id'))
-    const image_url = formData.get('image_url') as string
+    const imageFile = formData.get('image_url') as File
 
     const supabase = await createClient()
     
@@ -28,6 +28,31 @@ export async function updateItem(formData: FormData) {
     if (!name || name.trim().length === 0) {
       throw new Error('Item name is required')
     }
+
+    let image_url: string | undefined = undefined
+
+    if (imageFile && imageFile.size > 0) {
+      const fileExt = imageFile.name.split('.').pop()
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('item-images')
+        .upload(fileName, imageFile, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        throw new Error('Failed to upload image: ' + uploadError.message)
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('item-images')
+        .getPublicUrl(fileName)
+      
+      image_url = publicUrl
+    }
     
     const updateData: TablesUpdate<'items'> = {
       name: name.trim(),
@@ -39,7 +64,11 @@ export async function updateItem(formData: FormData) {
       status: status,
       created_at: created_at,
       collection_id: collection_id,
-      image_url: image_url
+    }
+
+    // Only update image_url if a new file was uploaded
+    if (image_url) {
+      updateData.image_url = image_url
     }
 
     const { data, error } = await supabase
