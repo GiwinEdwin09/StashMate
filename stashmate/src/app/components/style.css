@@ -340,3 +340,32 @@ table th:nth-child(9) {
   padding-right: 20px;
 }
 
+/* Cancel Button */
+.cancelbutton {
+  background-color: var(--accent);
+}
+
+.cancelbutton:hover {
+  background-color: color-mix(in srgb, var(--accent) 80%, black 20%);
+}
+
+/* Edit Button */
+.editbutton {
+  background-color: #33708a;
+  border-radius: 12px;
+}
+
+.editbutton:hover {
+  background-color: color-mix(in srgb, #33708a 80%, black 20%);
+}
+
+/* Delete Button */
+.deletebutton {
+  background-color: #8a3333;
+  border-radius: 12px;
+}
+
+.deletebutton:hover {
+  background-color: color-mix(in srgb, #8a3333 80%, black 20%);
+}
+
