@@ -50,11 +50,14 @@ import Inventory from './components/InventoryItem';
 import { createBrowserClient } from '@supabase/ssr'  // ← Change this
 import Navbar from './components/Navbar'; 
 import RevenueGraph from './components/RevenueGraph';
+import { getRevenueDataByCollection } from './actions/dashboard/getRevenueData';
 
 function App() {
   const [session, setSession] = useState<any>(null)
   const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null)
   const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [isLoadingRevenue, setIsLoadingRevenue] = useState(false);
+  const [revenueRefreshTrigger, setRevenueRefreshTrigger] = useState(0);
   
   // ✅ Create SSR browser client
   const supabase = createBrowserClient(
@@ -78,19 +81,32 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Fetch revenue data 
+  // Fetch revenue data when a collection is selected
   useEffect(() => {
-    if (selectedCollectionId !== null) {
-      // FOR TESTING (replace with actual values)
-      const sampleData = [
-        { date: '2025-01-01', revenue: 500 },
-        { date: '2025-02-01', revenue: 600 },
-        { date: '2025-03-01', revenue: 700 },
-        { date: '2025-04-01', revenue: 800 },
-      ];
-      setRevenueData(sampleData);
-    }
-  }, [selectedCollectionId]);
+    const fetchRevenueData = async () => {
+      if (selectedCollectionId !== null) {
+        setIsLoadingRevenue(true);
+        try {
+          console.log('Fetching revenue data for collection:', selectedCollectionId);
+          // Fetch revenue data by collection
+          // You can change 'day' to 'week' or 'month' for different aggregation
+          const data = await getRevenueDataByCollection(selectedCollectionId, 'day');
+          console.log('Revenue data received:', data);
+          setRevenueData(data);
+        } catch (error) {
+          console.error('Error fetching revenue data:', error);
+          // Fallback to empty array on error
+          setRevenueData([]);
+        } finally {
+          setIsLoadingRevenue(false);
+        }
+      } else {
+        setRevenueData([]);
+      }
+    };
+
+    fetchRevenueData();
+  }, [selectedCollectionId, revenueRefreshTrigger]);
 
   const logout = async () => {
     await supabase.auth.signOut()
@@ -105,6 +121,10 @@ function App() {
     setSelectedCollectionId(null)
   }
 
+  const refreshRevenue = () => {
+    setRevenueRefreshTrigger(prev => prev + 1);
+  }
+
   const isCollectionSelected = selectedCollectionId !== null;
 
   return (
@@ -115,7 +135,7 @@ function App() {
           <div className="container">
             {selectedCollectionId ? (
               <div>
-                <Inventory collectionId={selectedCollectionId} />
+                <Inventory collectionId={selectedCollectionId} onItemUpdate={refreshRevenue} />
                 {/* Only show RevenueGraph if a collection is selected */}
                 <RevenueGraph data={revenueData} />
               </div>

@@ -22,7 +22,7 @@ type Item = {
 };
 
 
-export default function Inventory({collectionId}: {collectionId: number}) {
+export default function Inventory({collectionId, onItemUpdate}: {collectionId: number, onItemUpdate?: () => void}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -92,6 +92,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
         setEditingItem(null)
         setImagePreview(null)
         await fetchItems()
+        onItemUpdate?.(); // Notify parent to refresh revenue
       } else {
         setErrorMessage('Failed to update item')
       }
@@ -103,6 +104,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
         setShowForm(false)
         setImagePreview(null)
         await fetchItems()
+        onItemUpdate?.(); // Notify parent to refresh revenue
       } else {
         setErrorMessage(result.error || 'Failed to create item')
       }
@@ -121,6 +123,7 @@ export default function Inventory({collectionId}: {collectionId: number}) {
 
     if (result.success) {
       await fetchItems();
+      onItemUpdate?.(); // Notify parent to refresh revenue
     } else {
       setErrorMessage(result.error || 'Failed to delete item');
     }
