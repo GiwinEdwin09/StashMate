@@ -18,6 +18,12 @@
     color:var(--text);
     background:linear-gradient(135deg,#0a0a0b,#121217);
   }
+  .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: block;
+  }
   
   /* Layout Utilities */
   .wrap{ max-width:1100px; margin:auto; padding:16px; }

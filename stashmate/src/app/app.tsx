@@ -6,6 +6,7 @@ import Inventory from './components/InventoryItem';
 import { createBrowserClient } from '@supabase/ssr'
 import Navbar from './components/Navbar'; 
 import RevenueGraph from './components/RevenueGraph';
+import InventoryPage from './components/InventoryPage';
 import { getRevenueDataByCollection } from './actions/dashboard/getRevenueData';
 
 import ExportButton from './components/exportButton';
@@ -105,15 +106,16 @@ function App() {
       />
       {session ? (
         <>
-          <div className="container">
-            {selectedCollectionId ? (
+          <div>
+            {/*{selectedCollectionId ? (
               <div>
                 <Inventory collectionId={selectedCollectionId} onItemUpdate={refreshRevenue} />
                 <RevenueGraph data={revenueData} />
               </div>
             ) : (
               <Collection onSelectCollection={handleSelectCollection} />
-            )}
+            )}*/}
+            <InventoryPage />
           </div>
         </>
       ) : (

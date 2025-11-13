@@ -215,88 +215,89 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
   }
 
   return (
-    <div>
-      <h2>Inventory</h2>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '1rem', width: '100%' }}>
 
-      {/* Statistics */}
-      <div className="flex gap-4">
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Items in Catalog
-          </label>
-          <p className="text-base font-semibold">{items.length}</p>
+        {/* Statistics */}
+        <div className="flex gap-4 mb-4">
+          <div className="w-64 h-20 p-3 rounded-lg shadow border card">
+            <label htmlFor="name" className="block text-sm font-medium mb-1">
+              Items in Catalog
+            </label>
+            <p className="text-base font-semibold">{items.length}</p>
+          </div>
+
+          <div className="w-64 h-20 p-3 rounded-lg shadow border card">
+            <label htmlFor="name" className="block text-sm font-medium mb-1">
+              Inventory Value (Cost)
+            </label>
+            <p className="text-base font-semibold">${inventoryValue.toFixed(2)}</p>
+          </div>
+
+          <div className="w-64 h-20 p-3 rounded-lg shadow border card">
+            <label htmlFor="name" className="block text-sm font-medium mb-1">
+              Potential Profit (Unsold)
+            </label>
+            <p className="text-base font-semibold">${potentialProfit.toFixed(2)}</p>
+          </div>
+
+          <div className="w-64 h-20 p-3 rounded-lg shadow border card">
+            <label htmlFor="name" className="block text-sm font-medium mb-1">
+              Total Profit
+            </label>
+            <p className="text-base font-semibold">${totalProfit.toFixed(2)}</p>
+          </div>
         </div>
 
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Inventory Value (Cost)
-          </label>
-          <p className="text-base font-semibold">${inventoryValue.toFixed(2)}</p>
-        </div>
-
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Potential Profit (Unsold)
-          </label>
-          <p className="text-base font-semibold">${potentialProfit.toFixed(2)}</p>
-        </div>
-
-        <div className="w-64 h-20 p-3 rounded-lg shadow border card">
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Total Profit
-          </label>
-          <p className="text-base font-semibold">${totalProfit.toFixed(2)}</p>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="mt-3 mb-3">
-        <div className="flex justify-between items-center mb-2">
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition"
-          >
-            + Add Item
-          </button>
-          <div className="flex items-center gap-2">
+        {/* Buttons & Sort/Search */}
+        <div className="mt-6">
+          <div className="flex justify-between items-center">
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded transition ${
-                showFilters 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              onClick={() => setShowForm(true)}
+              className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition"
             >
-              Filters
+              + Add Item
             </button>
-            <select
-              value={searchField}
-              onChange={(e) => setSearchField(e.target.value as SearchField)}
-              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
-              style={{ minWidth: '120px' }}
-            >
-              <option value="name">Name</option>
-              <option value="condition">Condition</option>
-              <option value="status">Status</option>
-              <option value="source">Source</option>
-            </select>
-            <input
-              type="text"
-              placeholder={`Search by ${searchField}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              style={{ minWidth: '250px' }}
-            />
-            {searchQuery && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => setSearchQuery('')}
-                className="text-gray-500 hover:text-gray-700 px-2"
-                title="Clear search"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 py-2 rounded transition ${
+                  showFilters 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
               >
-                ✕
+                Filters
               </button>
-            )}
+              <select
+                value={searchField}
+                onChange={(e) => setSearchField(e.target.value as SearchField)}
+                className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                style={{ minWidth: '120px' }}
+              >
+                <option value="name">Name</option>
+                <option value="condition">Condition</option>
+                <option value="status">Status</option>
+                <option value="source">Source</option>
+              </select>
+              <input
+                type="text"
+                placeholder={`Search by ${searchField}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                style={{ minWidth: '250px' }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-gray-500 hover:text-gray-700 px-2"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -441,10 +442,13 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
           </div>
         </div>
       )}
+
+      {/* Table */}
+
       {isLoading 
         ? "Loading..." 
         : (
-        <section className="tableWrap" style={{ marginTop: 12 }}>
+        <section className="tableWrap" style={{ marginTop: 3 }}>
           <table id="itemsTable">
             <thead>
               <tr>
@@ -543,8 +547,13 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
             }
           }}
         >
-          <div className="border p-6 rounded-lg shadow-lg w-[600px] relative" style={{backgroundColor: 'var(--panel)', border: '1px solid var(--border)'}}>
-
+          <div 
+            className="border p-6 rounded-lg shadow-lg w-[600px] relative" 
+            style={{
+              backgroundColor: 'var(--panel)', 
+              border: '1px solid var(--border)'
+            }}
+          >
             <form onSubmit={handleSubmit}>
               <h3 className="text-lg font-semibold mb-4">{editingItem ? 'Edit Item' : 'Add New Item'}</h3>
               <hr className="-mx-6 my-4 border-t" style={{ borderColor: 'var(--border)' }} />
