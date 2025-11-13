@@ -109,10 +109,6 @@ function App() {
             {selectedCollectionId ? (
               <div>
                 <Inventory collectionId={selectedCollectionId} onItemUpdate={refreshRevenue} />
-                {/* Only show RevenueGraph if a collection is selected */}
-
-                <Inventory collectionId={selectedCollectionId} />
-
                 <RevenueGraph data={revenueData} />
               </div>
             ) : (

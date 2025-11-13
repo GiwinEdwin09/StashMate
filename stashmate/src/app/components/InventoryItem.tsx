@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { createItem } from '../actions/items/createItem'
 import { deleteItem } from '../actions/items/deleteItem'
 import { updateItem } from '../actions/items/updateItem'
+import { searchItems, type SearchField, type PriceFilters } from '../actions/items/searchItems'
 import { supabase } from "@/lib/supabaseClient";
 import './style.css';
 
@@ -33,6 +34,17 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
   const [totalProfit, setTotalProfit] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchField, setSearchField] = useState<SearchField>('name');
+  const [showFilters, setShowFilters] = useState(false);
+  const [priceFilters, setPriceFilters] = useState<PriceFilters>({
+    minCost: undefined,
+    maxCost: undefined,
+    minPrice: undefined,
+    maxPrice: undefined,
+  });
+  const [maxCost, setMaxCost] = useState(1000);
+  const [maxPrice, setMaxPrice] = useState(1000);
 
   // Status mapping function
   const getStatusText = (status: number): string => {
@@ -48,29 +60,88 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
     }
   };
 
-  // Fetch Items
-  const fetchItems = async () => {
+  // Fetch Items (with optional search and filters)
+  const fetchItems = async (searchTerm: string = '') => {
     setIsLoading(true);
-    const { error: fetchItemErr, data } = await supabase.from('items').select('*').eq('collection_id', collectionId);
-    if (fetchItemErr) {
-      console.error("Error fetching items");
-      setErrorMessage("Error fetching items");
-      return;
-    }
-    else {
-      setItems(data);
-      setInventoryValue(data.reduce((sum, item) => sum + (item.cost || 0), 0));
-      const unsoldItems = data.filter(item => item.status !== 2);
-      const soldItems = data.filter(item => item.status === 2);
-      setPotentialProfit(unsoldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
-      setTotalProfit(soldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
+    
+    // Check if filters are active
+    const hasFilters = priceFilters.minCost !== undefined || 
+                      priceFilters.maxCost !== undefined || 
+                      priceFilters.minPrice !== undefined || 
+                      priceFilters.maxPrice !== undefined;
+    
+    if (searchTerm.trim() || hasFilters) {
+      // Use server-side search with filters (even if search is empty, filters may be applied)
+      const result = await searchItems(collectionId, searchTerm, searchField, priceFilters);
+      if (result.success && result.data) {
+        setItems(result.data);
+        setInventoryValue(result.data.reduce((sum, item) => sum + (item.cost || 0), 0));
+        const unsoldItems = result.data.filter(item => item.status !== 2);
+        const soldItems = result.data.filter(item => item.status === 2);
+        setPotentialProfit(unsoldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
+        setTotalProfit(soldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
+        
+        // Update max values for sliders based on search results
+        if (result.data.length > 0) {
+          const costs = result.data.map(item => item.cost || 0);
+          const prices = result.data.map(item => item.price || 0);
+          setMaxCost(Math.max(...costs, 1000));
+          setMaxPrice(Math.max(...prices, 1000));
+        }
+      } else {
+        setErrorMessage(result.error || "Error searching items");
+        setItems([]);
+      }
+    } else {
+      // Fetch all items when no search query and no filters
+      const { error: fetchItemErr, data } = await supabase.from('items').select('*').eq('collection_id', collectionId);
+      if (fetchItemErr) {
+        console.error("Error fetching items");
+        setErrorMessage("Error fetching items");
+        setItems([]);
+      } else {
+        setItems(data || []);
+        setInventoryValue((data || []).reduce((sum, item) => sum + (item.cost || 0), 0));
+        const unsoldItems = (data || []).filter(item => item.status !== 2);
+        const soldItems = (data || []).filter(item => item.status === 2);
+        setPotentialProfit(unsoldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
+        setTotalProfit(soldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
+        
+        // Calculate max values for sliders
+        if (data && data.length > 0) {
+          const costs = data.map(item => item.cost || 0);
+          const prices = data.map(item => item.price || 0);
+          setMaxCost(Math.max(...costs, 1000));
+          setMaxPrice(Math.max(...prices, 1000));
+        }
+      }
     }
     setIsLoading(false);
   };
 
+  // Fetch items when collection changes (reset search and filters)
   useEffect(() => {
-    fetchItems();
+    setSearchQuery('');
+    setSearchField('name');
+    setPriceFilters({
+      minCost: undefined,
+      maxCost: undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+    });
+    fetchItems('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId]);
+
+  // Debounced search effect - runs when searchQuery, searchField, or filters change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchItems(searchQuery);
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, searchField, priceFilters]);
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -179,12 +250,197 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
       </div>
 
       {/* Table */}
-      <button
-        onClick={() => setShowForm(true)}
-        className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition mt-3"
-      >
-        + Add Item
-      </button>
+      <div className="mt-3 mb-3">
+        <div className="flex justify-between items-center mb-2">
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition"
+          >
+            + Add Item
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-4 py-2 rounded transition ${
+                showFilters 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Filters
+            </button>
+            <select
+              value={searchField}
+              onChange={(e) => setSearchField(e.target.value as SearchField)}
+              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+              style={{ minWidth: '120px' }}
+            >
+              <option value="name">Name</option>
+              <option value="condition">Condition</option>
+              <option value="status">Status</option>
+              <option value="source">Source</option>
+            </select>
+            <input
+              type="text"
+              placeholder={`Search by ${searchField}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              style={{ minWidth: '250px' }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-gray-500 hover:text-gray-700 px-2"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Filter Modal Overlay */}
+      {showFilters && (
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowFilters(false);
+            }
+          }}
+        >
+          <div className="bg-black border border-gray-700 rounded-lg shadow-lg w-[600px] max-w-[90vw] max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-semibold text-white">Filter Items</h3>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-gray-400 hover:text-white text-2xl leading-none transition"
+                title="Close"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Cost Range - Minimum */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-white">
+                  Minimum Cost: ${priceFilters.minCost?.toFixed(2) || '0.00'}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max={maxCost}
+                  step="1"
+                  value={priceFilters.minCost || 0}
+                  onChange={(e) => setPriceFilters({
+                    ...priceFilters,
+                    minCost: parseFloat(e.target.value) || undefined
+                  })}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>$0</span>
+                  <span>${maxCost.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              {/* Cost Range - Maximum */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-white">
+                  Maximum Cost: ${priceFilters.maxCost?.toFixed(2) || maxCost.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max={maxCost}
+                  step="1"
+                  value={priceFilters.maxCost || maxCost}
+                  onChange={(e) => setPriceFilters({
+                    ...priceFilters,
+                    maxCost: parseFloat(e.target.value) || undefined
+                  })}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>$0</span>
+                  <span>${maxCost.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              {/* Price Range - Minimum */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-white">
+                  Minimum Price: ${priceFilters.minPrice?.toFixed(2) || '0.00'}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max={maxPrice}
+                  step="1"
+                  value={priceFilters.minPrice || 0}
+                  onChange={(e) => setPriceFilters({
+                    ...priceFilters,
+                    minPrice: parseFloat(e.target.value) || undefined
+                  })}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>$0</span>
+                  <span>${maxPrice.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              {/* Price Range - Maximum */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-white">
+                  Maximum Price: ${priceFilters.maxPrice?.toFixed(2) || maxPrice.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max={maxPrice}
+                  step="1"
+                  value={priceFilters.maxPrice || maxPrice}
+                  onChange={(e) => setPriceFilters({
+                    ...priceFilters,
+                    maxPrice: parseFloat(e.target.value) || undefined
+                  })}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>$0</span>
+                  <span>${maxPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-between gap-3">
+              <button
+                onClick={() => {
+                  setPriceFilters({
+                    minCost: undefined,
+                    maxCost: undefined,
+                    minPrice: undefined,
+                    maxPrice: undefined,
+                  });
+                }}
+                className="px-4 py-2 text-sm text-gray-300 hover:text-white border border-gray-600 rounded hover:bg-gray-800 transition"
+              >
+                Clear All Filters
+              </button>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isLoading 
         ? "Loading..." 
         : (
@@ -209,7 +465,9 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
               {items.length === 0
                 ? (
                   <tr>
-                    <td colSpan={11}>No items found</td>
+                    <td colSpan={11}>
+                      {searchQuery ? `No items found matching "${searchQuery}"` : 'No items found'}
+                    </td>
                   </tr>
                 )
                 : (
