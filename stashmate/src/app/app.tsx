@@ -115,7 +115,11 @@ function App() {
             ) : (
               <Collection onSelectCollection={handleSelectCollection} />
             )}*/}
-            <InventoryPage />
+            <InventoryPage
+              onBack={handleBack}
+              refreshRevenue={refreshRevenue}
+              revenueData={revenueData}
+            />
           </div>
         </>
       ) : (

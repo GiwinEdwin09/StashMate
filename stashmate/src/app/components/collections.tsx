@@ -149,15 +149,15 @@ const handleItemSubmit = async (e: React.FormEvent) => {
   return (
     <>
       {/* Collections Sidebar */}
-      <aside className="flex flex-col h-screen p-0">
-        <div className="relative w-full sticky top-0 z-10">
+      <aside className="flex flex-col h-[calc(100vh-105px)]">
+        {/* Collections Navbar */}
+        <div className="relative w-full top-0 z-10">
           <div 
             className="absolute -left-4 -right-4 -top-4 -bottom-1 bg-gray-900 z-0"
             style={{backgroundColor: 'var(--bg)'}}
           >
           </div>
-          {/* Add Collection Button */}
-          <div className="flex items-center justify-between py-3 px-4 relative z-10">
+          <div className="flex items-center justify-between py-3 px-2 relative z-10">
             <h3 className="text-lg font-semibold">Collections</h3>
             <button
               onClick={() => setShowOverlay(true)}
@@ -169,39 +169,46 @@ const handleItemSubmit = async (e: React.FormEvent) => {
         </div>
 
         {/* Display Collections */}
-        <div className="flex-1 overflow-y-auto">
-          {isLoading 
-            ? "Loading..."
-            : collections.length === 0 
-              ? "No collections yet." 
-              : (
-              <ul className="space-y-2">
-                {collections.map((col) => (
-                  <li
-                  key={col.id}
-                  className="p-3 bg-gray-800 rounded hover:bg-gray-700 cursor-pointer flex justify-between items-center"
-                  onClick={() => onSelectCollection(col.id)} 
-                  >
-                    <div className="flex-1 min-w-0"> 
-                      <p className="font-medium text-white">{col.name}</p>
-                      <p className="text-sm text-gray-400">{col.category}</p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0"> 
-                      <span className="text-xs text-gray-400 whitespace-nowrap"> 
-                        {new Date(col.acquired_date).toLocaleDateString()}
-                      </span>
-                      <button
-                        onClick={(e) => handleDelete(e, col.id)}
-                        disabled={deletingId === col.id}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+        <div className="flex-1 relative">
+          <div className="absolute inset-0 overflow-y-auto pr-2 -mr-2">
+            <div className="pt-4 pb-2 px-1">
+              {isLoading 
+                ? "Loading..."
+                : collections.length === 0 
+                  ? "No collections yet." 
+                  : (
+                  <ul className="space-y-2">
+                    {collections.map((col) => (
+                      <li
+                      key={col.id}
+                      className="p-3 rounded cursor-pointer flex justify-between items-center transition-colors hover:opacity-90"
+                      style={{
+                        backgroundColor: "var(--border)"
+                      }}
+                      onClick={() => onSelectCollection(col.id)} 
                       >
-                        {deletingId === col.id ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-          )}
+                        <div className="flex-1 min-w-0"> 
+                          <p className="font-medium text-white">{col.name}</p>
+                          <p className="text-sm text-gray-400">{col.category}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0"> 
+                          <span className="text-xs text-gray-400 whitespace-nowrap"> 
+                            {new Date(col.acquired_date).toLocaleDateString()}
+                          </span>
+                          <button
+                            onClick={(e) => handleDelete(e, col.id)}
+                            disabled={deletingId === col.id}
+                            className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                          >
+                            {deletingId === col.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+              )}
+            </div>
+          </div>
         </div>
       </aside>
     
