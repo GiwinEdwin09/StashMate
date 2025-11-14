@@ -9,12 +9,15 @@ export default function InventoryPage({
   onBack,
   refreshRevenue,
   revenueData,
+  selectedCollectionId,
+  setSelectedCollectionId,
 }: {
   onBack: () => void;
   refreshRevenue: () => void;
   revenueData: any[];
+  selectedCollectionId: number | null;
+  setSelectedCollectionId: (id: number | null) => void;
 }) {
-  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null);
 
   return (
     <div className="flex h-[calc(100vh-64px)]">

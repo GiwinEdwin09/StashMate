@@ -65,17 +65,7 @@ function App() {
     fetchRevenueData();
   }, [selectedCollectionId, revenueRefreshTrigger]);
 
-  useEffect(() => {
-    if (selectedCollectionId !== null) {
-      const sampleData = [
-        { date: '2025-01-01', revenue: 500 },
-        { date: '2025-02-01', revenue: 600 },
-        { date: '2025-03-01', revenue: 700 },
-        { date: '2025-04-01', revenue: 800 },
-      ];
-      setRevenueData(sampleData);
-    }
-  }, [selectedCollectionId]);
+  // Remove this sample data - it was overwriting the real data
 
   const logout = async () => {
     await supabase.auth.signOut()
@@ -110,6 +100,8 @@ function App() {
               onBack={handleBack}
               refreshRevenue={refreshRevenue}
               revenueData={revenueData}
+              selectedCollectionId={selectedCollectionId}
+              setSelectedCollectionId={setSelectedCollectionId}
             />
           </div>
         </>
