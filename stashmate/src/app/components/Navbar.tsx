@@ -13,7 +13,6 @@ const Navbar: React.FC<NavbarProps> = ({
   logout, 
   handleBack, 
   isCollectionSelected,
-  exportButton 
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -28,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="navbar-actions">
-          {exportButton}
+          {/* {exportButton} */}
           
           {isCollectionSelected && (
             <button className="navbar-add-item-btn">+ Add Item</button>

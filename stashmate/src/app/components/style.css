@@ -196,6 +196,7 @@ header.navbar-container {
   padding: 16px 32px;
   background-color: #111;
   border-bottom: 2px solid #333;
+  height:60px;
 }
 
 .navbar-logo {

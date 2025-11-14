@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { getCollections } from '../actions/collections/getCollection'
 import { deleteCollection } from '../actions/collections/deleteCollection'
 import { createItem } from '../actions/items/createItem'
+import { exportCollectionsWithItems } from '../actions/Export-Import/export'
 
 type Collection = {
   id: number
@@ -28,6 +29,8 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
   const [success, setSuccess] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [selectedExport, setSelectExprt] = useState<string[]>([])
+  const [isExporting, setIsExporting] = useState(false)
 
   const fetchCollections = async () => {
     setIsLoading(true);
@@ -92,6 +95,56 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
 
     setDeletingId(null);
   }
+  const specificExprtClick = (e: React.MouseEvent, collectionId: number) => {
+    e.stopPropagation();
+    
+    const idStr = collectionId.toString();
+    setSelectExprt(curr => {
+      const alreadySelected = curr.includes(idStr);
+      if (alreadySelected) {
+        return curr.filter(id => id !== idStr);
+      } else {
+        return [...curr, idStr];
+      }
+    });
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    setError('');
+    
+    try {
+      const ids = selectedExport.length > 0 ? selectedExport : undefined;
+      const result = await exportCollectionsWithItems(ids);
+      
+      if (!result.csv) {
+        setError(result.error || 'Export failed');
+        return;
+      }
+
+      const blob = new Blob([result.csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `collections-items-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setSuccess(true);
+      
+      setSelectExprt([]);
+      
+    } catch (error) {
+      console.error('Export error:', error);
+      setError('Failed to export collections');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+  
   
   const [newItem, setNewItem] = useState({
     name: '',
@@ -147,18 +200,25 @@ const handleItemSubmit = async (e: React.FormEvent) => {
 };
 
   return (
-    <>
-      {/* Collections Sidebar */}
-      <aside className="flex flex-col h-screen p-0">
-        <div className="relative w-full sticky top-0 z-10">
-          <div 
-            className="absolute -left-4 -right-4 -top-4 -bottom-1 bg-gray-900 z-0"
-            style={{backgroundColor: 'var(--bg)'}}
-          >
-          </div>
-          {/* Add Collection Button */}
-          <div className="flex items-center justify-between py-3 px-4 relative z-10">
-            <h3 className="text-lg font-semibold">Collections</h3>
+  <>
+    {/* Collections Sidebar */}
+    <aside className="flex flex-col h-full">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700">
+        {/* Header with Export and Add buttons */}
+        <div className="flex items-center justify-between py-3 px-4">
+          <h3 className="text-lg font-semibold">Collections</h3>
+          <div className="flex gap-2">
+            {/* Export Button */}
+            <button
+              onClick={handleExport}
+              disabled={isExporting || collections.length === 0}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              title={selectedExport.length > 0 ? `Export ${selectedExport.length} selected` : 'Export all collections'}
+            >
+              {isExporting ? 'Exporting...' : selectedExport.length > 0 ? `Export (${selectedExport.length})` : 'Export All'}
+            </button>
+            {/* Add Collection Button */}
             <button
               onClick={() => setShowOverlay(true)}
               className="flex items-center justify-center bg-emerald-600 text-white text-xl rounded-md hover:bg-emerald-700 transition-colors w-6 h-6"
@@ -167,43 +227,60 @@ const handleItemSubmit = async (e: React.FormEvent) => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Display Collections */}
-        <div className="flex-1 overflow-y-auto">
-          {isLoading 
-            ? "Loading..."
-            : collections.length === 0 
-              ? "No collections yet." 
-              : (
-              <ul className="space-y-2">
-                {collections.map((col) => (
-                  <li
+      {/* Display Collections */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {isLoading 
+          ? <div className="text-gray-400">Loading...</div>
+          : collections.length === 0 
+            ? <div className="text-gray-400">No collections yet.</div>
+            : (
+            <ul className="space-y-2">
+              {collections.map((col) => (
+                <li
                   key={col.id}
-                  className="p-3 bg-gray-800 rounded hover:bg-gray-700 cursor-pointer flex justify-between items-center"
-                  onClick={() => onSelectCollection(col.id)} 
+                  className="p-3 bg-gray-800 rounded hover:bg-gray-700 cursor-pointer flex items-center gap-3"
+                >
+                  {/* Checkbox */}
+                  <button
+                    onClick={(e) => specificExprtClick(e, col.id)}
+                    className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                      selectedExport.includes(col.id.toString()) ? 'bg-blue-600 border-blue-600' : 'border-gray-500 hover:border-blue-400'
+                    }`}
                   >
-                    <div className="flex-1 min-w-0"> 
-                      <p className="font-medium text-white">{col.name}</p>
-                      <p className="text-sm text-gray-400">{col.category}</p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0"> 
-                      <span className="text-xs text-gray-400 whitespace-nowrap"> 
-                        {new Date(col.acquired_date).toLocaleDateString()}
-                      </span>
-                      <button
-                        onClick={(e) => handleDelete(e, col.id)}
-                        disabled={deletingId === col.id}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
-                      >
-                        {deletingId === col.id ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-          )}
-        </div>
-      </aside>
+                    {selectedExport.includes(col.id.toString()) && (
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                  <div 
+                    className="flex-1 min-w-0"
+                    onClick={() => onSelectCollection(col.id)}
+                  >
+                    <p className="font-medium text-white">{col.name}</p>
+                    <p className="text-sm text-gray-400">{col.category}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                      {new Date(col.acquired_date).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={(e) => handleDelete(e, col.id)}
+                      disabled={deletingId === col.id}
+                      className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                    >
+                      {deletingId === col.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+        )}
+      </div>
+    </aside>
     
       {/* Add Collection Overlay */}
       {showOverlay && (
