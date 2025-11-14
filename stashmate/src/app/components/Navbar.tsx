@@ -7,12 +7,14 @@ interface NavbarProps {
   isCollectionSelected: boolean;
   exportButton?: React.ReactNode;
   onExport?: () => void | Promise<void>;
+  showCollectionsLink?: boolean; 
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
   logout, 
   handleBack, 
   isCollectionSelected,
+  showCollectionsLink = false,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -48,12 +50,18 @@ const Navbar: React.FC<NavbarProps> = ({
                     Back to Collections
                   </button>
                 )}
+                {showCollectionsLink && (
+                  <Link href="/" className="navbar-dropdown-item">
+                    Collections
+                  </Link>
+                )}
                 <Link href="/profile" className="navbar-dropdown-item">
                   Profile
                 </Link>
                 <button className="navbar-dropdown-item" onClick={logout}>
                   Log Out
                 </button>
+                
               </div>
             )}
           </div>
