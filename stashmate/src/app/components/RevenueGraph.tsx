@@ -7,8 +7,9 @@ import { Chart as ChartJS, CategoryScale, LinearScale, LineElement, PointElement
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
 
 type RevenueData = {
-  date: string; // or number
+  date: string;
   revenue: number;
+  profit: number;
 };
 
 interface RevenueGraphProps {
@@ -27,6 +28,7 @@ const RevenueGraph: React.FC<RevenueGraphProps> = ({ data }) => {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       });
       const revenueValues = data.map(item => item.revenue);
+      const profitValues = data.map(item => item.profit);
 
       setChartData({
         labels,
@@ -36,7 +38,15 @@ const RevenueGraph: React.FC<RevenueGraphProps> = ({ data }) => {
             data: revenueValues,
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
+            fill: false,
+            tension: 0.4,
+          },
+          {
+            label: 'Profit',
+            data: profitValues,
+            borderColor: 'rgb(255, 159, 64)',
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            fill: false,
             tension: 0.4,
           },
         ],
@@ -58,7 +68,8 @@ const RevenueGraph: React.FC<RevenueGraphProps> = ({ data }) => {
       tooltip: {
         callbacks: {
           label: function(context: any) {
-            return `Revenue: $${context.parsed.y.toFixed(2)}`;
+            const label = context.dataset.label || '';
+            return `${label}: $${context.parsed.y.toFixed(2)}`;
           }
         }
       }
@@ -77,11 +88,11 @@ const RevenueGraph: React.FC<RevenueGraphProps> = ({ data }) => {
 
   return (
     <div>
-      <h2>Revenue Graph</h2>
+      <h2>Revenue & Profit</h2>
       {chartData ? (
         <Line data={chartData} options={options} />
       ) : (
-        <p>No revenue data available. Sell some items to see your revenue graph!</p>
+        <p>No data available. Sell some items to see your revenue and profit trends.</p>
       )}
     </div>
   );

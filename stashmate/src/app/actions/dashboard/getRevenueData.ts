@@ -5,6 +5,7 @@ import { createClient } from '@/lib/server';
 type RevenueData = {
   date: string;
   revenue: number;
+  profit: number;
 };
 
 type AggregationPeriod = 'day' | 'week' | 'month';
@@ -46,8 +47,8 @@ export async function getRevenueData(
       return [];
     }
 
-    // Aggregate revenue by the specified period
-    const revenueByPeriod: Record<string, number> = {};
+    // Aggregate revenue and profit by the specified period
+    const dataByPeriod: Record<string, { revenue: number; profit: number }> = {};
 
     items.forEach((item) => {
       const date = new Date(item.created_at);
@@ -58,7 +59,6 @@ export async function getRevenueData(
           periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
           break;
         case 'week':
-          // Get the Monday of the week
           const monday = new Date(date);
           monday.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
           periodKey = monday.toISOString().split('T')[0];
@@ -70,19 +70,20 @@ export async function getRevenueData(
           periodKey = date.toISOString().split('T')[0];
       }
 
-      if (!revenueByPeriod[periodKey]) {
-        revenueByPeriod[periodKey] = 0;
+      if (!dataByPeriod[periodKey]) {
+        dataByPeriod[periodKey] = { revenue: 0, profit: 0 };
       }
 
-      // Use profit as revenue (you can change this to 'price' if needed)
-      revenueByPeriod[periodKey] += item.price;
+      dataByPeriod[periodKey].revenue += item.price;
+      dataByPeriod[periodKey].profit += item.profit;
     });
 
     // Convert to array and sort by date
-    const revenueData = Object.entries(revenueByPeriod)
-      .map(([date, revenue]) => ({
+    const revenueData = Object.entries(dataByPeriod)
+      .map(([date, data]) => ({
         date,
-        revenue,
+        revenue: data.revenue,
+        profit: data.profit,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -122,8 +123,8 @@ export async function getRevenueDataByCollection(
       return [];
     }
 
-    // Aggregate revenue by the specified period
-    const revenueByPeriod: Record<string, number> = {};
+    // Aggregate revenue and profit by the specified period
+    const dataByPeriod: Record<string, { revenue: number; profit: number }> = {};
 
     items.forEach((item) => {
       const date = new Date(item.created_at);
@@ -145,17 +146,19 @@ export async function getRevenueDataByCollection(
           periodKey = date.toISOString().split('T')[0];
       }
 
-      if (!revenueByPeriod[periodKey]) {
-        revenueByPeriod[periodKey] = 0;
+      if (!dataByPeriod[periodKey]) {
+        dataByPeriod[periodKey] = { revenue: 0, profit: 0 };
       }
 
-      revenueByPeriod[periodKey] += item.price;
+      dataByPeriod[periodKey].revenue += item.price;
+      dataByPeriod[periodKey].profit += item.profit;
     });
 
-    const revenueData = Object.entries(revenueByPeriod)
-      .map(([date, revenue]) => ({
+    const revenueData = Object.entries(dataByPeriod)
+      .map(([date, data]) => ({
         date,
-        revenue,
+        revenue: data.revenue,
+        profit: data.profit,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
