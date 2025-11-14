@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/server'
 import { json2csv } from 'json-2-csv' 
 
-export async function exportCollectionsWithItems() {
+export async function exportCollectionsWithItems(collectionID?: string[]) {
   const supabase = await createClient()
   
   const response = await supabase.auth.getUser()
@@ -13,7 +13,7 @@ export async function exportCollectionsWithItems() {
     return {error: 'You must be logged in'}
   }
 
-  const { data: collections, error } = await supabase
+  let query = supabase
     .from('collections')
     .select(`
       *,
@@ -21,6 +21,12 @@ export async function exportCollectionsWithItems() {
     `)
     .eq('owner_id', user.id)
     .order('acquired_date', { ascending: false })
+  
+  if (collectionID && collectionID.length > 0) {
+    query = query.in('id',collectionID)
+  }
+  
+  const { data: collections, error } = await query.order('acquired_date', { ascending: false })
 
   if (error) {
     return { error: error.message }

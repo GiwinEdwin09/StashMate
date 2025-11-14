@@ -9,7 +9,7 @@ import RevenueGraph from './components/RevenueGraph';
 import InventoryPage from './components/InventoryPage';
 import { getRevenueDataByCollection } from './actions/dashboard/getRevenueData';
 
-import ExportButton from './components/exportButton';
+//import ExportButton from './components/exportButton';
 
 function App() {
   const [session, setSession] = useState<any>(null)
@@ -101,20 +101,11 @@ function App() {
       <Navbar 
         logout={logout} 
         handleBack={handleBack} 
-        isCollectionSelected={isCollectionSelected} 
-        exportButton={<ExportButton />}
+        isCollectionSelected={isCollectionSelected}
       />
       {session ? (
         <>
           <div>
-            {/*{selectedCollectionId ? (
-              <div>
-                <Inventory collectionId={selectedCollectionId} onItemUpdate={refreshRevenue} />
-                <RevenueGraph data={revenueData} />
-              </div>
-            ) : (
-              <Collection onSelectCollection={handleSelectCollection} />
-            )}*/}
             <InventoryPage
               onBack={handleBack}
               refreshRevenue={refreshRevenue}

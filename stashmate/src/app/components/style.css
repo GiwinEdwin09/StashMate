@@ -83,7 +83,7 @@
     border-spacing:0;
   }
   thead th{
-    position:sticky;
+    /*position:sticky;*/
     top:0;
     background:#0e0e11;
     border-bottom:1px solid var(--border);
@@ -196,6 +196,7 @@ header.navbar-container {
   padding: 16px 32px;
   background-color: #111;
   border-bottom: 2px solid #333;
+  height:80px;
 }
 
 .navbar-logo {
