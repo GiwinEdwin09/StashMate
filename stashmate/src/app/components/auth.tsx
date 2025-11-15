@@ -30,6 +30,7 @@ export default function Auth() {
     
     // Password validation
     if (!password) {
+      console.log('Email is empty'); 
       setErrorMessage('Password is required');
       return false;
     }
