@@ -6,6 +6,7 @@ import { getCollections } from '../actions/collections/getCollection'
 import { deleteCollection } from '../actions/collections/deleteCollection'
 import { createItem } from '../actions/items/createItem'
 import { exportCollectionsWithItems } from '../actions/Export-Import/export'
+import ImportButton from './importButton'
 
 type Collection = {
   id: number
@@ -133,8 +134,6 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      setSuccess(true);
-      
       setSelectExprt([]);
       
     } catch (error) {
@@ -168,8 +167,7 @@ const handleItemSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   if (newItem.name && newItem.condition && newItem.cost && newItem.price) {
-    // Convert newItem to FormData
-    const formData = new FormData();  // Correctly instantiate FormData
+    const formData = new FormData(); 
     formData.append('name', newItem.name);
     formData.append('condition', newItem.condition);
     formData.append('cost', newItem.cost.toString());  // Convert numbers to string for FormData
@@ -192,7 +190,7 @@ const handleItemSubmit = async (e: React.FormEvent) => {
         source: '',
         collectionId: 0,
       });
-      await fetchCollections(); // Fetch collections again after successful addition
+      await fetchCollections();
     } else {
       setError(result.error || 'Failed to add item');
     }
@@ -211,24 +209,36 @@ const handleItemSubmit = async (e: React.FormEvent) => {
           >
           </div>
           <div className="flex items-center justify-between py-3 px-2 relative z-10">
-            <h3 className="text-lg font-semibold">Collections</h3>
-            {/* Export Button */}
-            <button
-              onClick={handleExport}
-              disabled={isExporting || collections.length === 0}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              title={selectedExport.length > 0 ? `Export ${selectedExport.length} selected` : 'Export all collections'}
-            >
-              {isExporting ? 'Exporting...' : selectedExport.length > 0 ? `Export (${selectedExport.length})` : 'Export All'}
-            </button>
-            {/* Add Collection Button */}
-            <button
-              onClick={() => setShowOverlay(true)}
-              className="flex items-center justify-center bg-emerald-600 text-white text-xl rounded-md hover:bg-emerald-700 transition-colors w-6 h-6"
-            >
-              <span style={{ transform: 'translateY(-1px)' }}>+</span>
-            </button>
+            
+            <div className="flex flex-col space-y-6">
+              <h3 className="text-lg font-semibold">Collections</h3>
+              
+              {/* Export Button */}
+              <div className="flex flex-row">
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting || collections.length === 0}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors mr-3"
+                  title={selectedExport.length > 0 ? `Export ${selectedExport.length} selected` : 'Export all collections'}
+                >
+                  {isExporting
+                    ? 'Exporting...'
+                    : selectedExport.length > 0
+                    ? `Export (${selectedExport.length})`
+                    : 'Export All'}
+                </button>
+
+                <ImportButton onImportComplete={fetchCollections} />
+                <button
+                  onClick={() => setShowOverlay(true)}
+                  className="px-3 py-1  bg-green-600 text-white rounded  hover:bg-green-700"
+                >
+                  <span className="rounded">+</span>
+                </button>
+              </div>
+            </div>
           </div>
+
         </div>
 
         {/* Display Collections */}

@@ -8,7 +8,8 @@ export async function updateItem(formData: FormData) {
     const condition = formData.get('condition') as string | null
     const cost = Number(formData.get('cost'))
     const price = Number(formData.get('price'))
-    const profit = price-cost
+    const quantity = Number(formData.get('quantity')) || 1
+    const profit = (price - cost) * quantity
     const source = formData.get('source') as string
     const status = Number(formData.get('status'))
     const created_at = formData.get('created_at') as string
@@ -60,13 +61,13 @@ export async function updateItem(formData: FormData) {
       cost: cost,
       price: price,
       profit: profit,
+      quantity: quantity,
       source: source.trim(),
       status: status,
       created_at: created_at,
       collection_id: collection_id,
     }
 
-    // Only update image_url if a new file was uploaded
     if (image_url) {
       updateData.image_url = image_url
     }

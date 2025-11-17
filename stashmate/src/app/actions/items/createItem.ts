@@ -9,6 +9,7 @@ export async function createItem(formData: FormData) {
   const profit = price - cost
   const source = formData.get('source') as string
   const status = Number(formData.get('status'));
+  const quantity = Number(formData.get('quantity'));
   const collectionId = Number(formData.get('collection_id'))
   const imageFile = formData.get('image_url') as File
   const created_at = formData.get('created_at') as string
@@ -53,6 +54,7 @@ export async function createItem(formData: FormData) {
     condition: condition,
     cost: cost,
     price: price,
+    quantity: quantity,
     profit: profit,
     source: source,
     status: status,
