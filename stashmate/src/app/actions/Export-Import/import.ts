@@ -42,10 +42,10 @@ export async function importCollectionsWithItems(csvContent: string) {
         collections.set(key, {
           name: toString(row.collection_name),
           category: toString(row.collection_category),
-          cond: toString(row.collection_cond) || null,
-          source: toString(row.collection_source) || null,
+          // cond: toString(row.collection_cond) || null,
+          // source: toString(row.collection_source) || null,
           acquired_date: row.collection_acquired_date,
-          status: toNumber(row.collection_status, 0),
+          // status: toNumber(row.collection_status, 0),
           items: []
         })
       }
@@ -77,10 +77,10 @@ export async function importCollectionsWithItems(csvContent: string) {
     for (const [key, collection] of collections) {
       const items = collection.items
       /* https://www.geeksforgeeks.org/typescript/typescript-array-reduce-method/ */
-      const collectionQty = items.reduce((sum: any, item: { quantity: any }) => sum + item.quantity, 0)
-      const collectionCost = items.reduce((sum: number, item: { cost: number; quantity: number }) => sum + (item.cost * item.quantity), 0)
-      const collectionValue = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity), 0)
-      const collectionProfit = collectionValue - collectionCost
+      // const collectionQty = items.reduce((sum: any, item: { quantity: any }) => sum + item.quantity, 0)
+      // const collectionCost = items.reduce((sum: number, item: { cost: number; quantity: number }) => sum + (item.cost * item.quantity), 0)
+      // const collectionValue = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity), 0)
+      // const collectionProfit = collectionValue - collectionCost
       
       delete collection.items
 
@@ -99,10 +99,10 @@ export async function importCollectionsWithItems(csvContent: string) {
           .from('collections')
           .update({
             category: collection.category,
-            qty: collectionQty,
-            cost: collectionCost,
-            value: collectionValue,
-            profit: collectionProfit,
+            // qty: collectionQty,
+            // cost: collectionCost,
+            // value: collectionValue,
+            // profit: collectionProfit,
           })
           .eq('id', existingCollection.id)
 
@@ -118,10 +118,10 @@ export async function importCollectionsWithItems(csvContent: string) {
           .from('collections')
           .insert({ 
             ...collection,
-            qty: collectionQty,
-            cost: collectionCost,
-            value: collectionValue,
-            profit: collectionProfit,
+            // qty: collectionQty,
+            // cost: collectionCost,
+            // value: collectionValue,
+            // profit: collectionProfit,
             owner_id: user.id 
           })
           .select()
