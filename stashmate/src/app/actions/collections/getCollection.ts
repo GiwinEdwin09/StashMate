@@ -14,6 +14,7 @@ export async function getCollections() {
   const { data, error } = await supabase
     .from('collections')
     .select('*')
+    .eq('owner_id', user.id)
     .order('id', { ascending: false })
 
   console.log('Supabase response:', { data, error });
