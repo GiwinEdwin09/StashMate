@@ -7,6 +7,7 @@ import { deleteCollection } from '../actions/collections/deleteCollection'
 import { createItem } from '../actions/items/createItem'
 import { exportCollectionsWithItems } from '../actions/Export-Import/export'
 import ImportButton from './importButton'
+import ShareModal from './ShareModal'
 
 type Collection = {
   id: number
@@ -32,6 +33,8 @@ export default function AddCollectionForm({onSelectCollection}: {onSelectCollect
   const [showOverlay, setShowOverlay] = useState(false);
   const [selectedExport, setSelectExprt] = useState<string[]>([])
   const [isExporting, setIsExporting] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null)
 
   const fetchCollections = async () => {
     setIsLoading(true);
@@ -251,7 +254,7 @@ const handleItemSubmit = async (e: React.FormEvent) => {
                   ? <div className="text-gray-400">No collections yet.</div>
                   : (
                   <ul className="space-y-2">
-                    {collections.map((col) => (
+                    {collections.filter(col => col && col.id).map((col) => (
                       <li
                         key={col.id}
                         className="p-3 bg-gray-800 rounded hover:bg-gray-700 cursor-pointer flex items-center gap-3"
@@ -281,6 +284,16 @@ const handleItemSubmit = async (e: React.FormEvent) => {
                           <span className="text-xs text-gray-400 whitespace-nowrap">
                             {new Date(col.acquired_date).toLocaleDateString()}
                           </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCollectionId(col.id);
+                              setShowShareModal(true);
+                            }}
+                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors whitespace-nowrap"
+                          >
+                            Share
+                          </button>
                           <button
                             onClick={(e) => handleDelete(e, col.id)}
                             disabled={deletingId === col.id}
@@ -375,6 +388,17 @@ const handleItemSubmit = async (e: React.FormEvent) => {
             &times;
           </button>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && selectedCollectionId && (
+        <ShareModal
+          collectionId={selectedCollectionId}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedCollectionId(null);
+          }}
+        />
       )}
     </>
   )
