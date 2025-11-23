@@ -4,6 +4,10 @@ import App from './app'
 import React, { useState, useEffect } from 'react';
 import RevenueGraph from './components/RevenueGraph';
 import Navbar from './components/Navbar';
+import ThemeToggle from './components/ThemeToggle';
+import { createBrowserClient } from '@supabase/ssr';
+import md5 from "blueimp-md5"
+import Link from "next/link"
 
 const Page: React.FC = () => {
   const [revenueData, setRevenueData] = useState<any[]>([]);
