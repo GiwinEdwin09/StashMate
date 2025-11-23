@@ -27,11 +27,11 @@ export async function createCollection(formData: FormData) {
   const insertData = {
     name: name,
     category: category,
-    cost: 0,
-    value: 0,
-    profit: 0,
-    qty: 0,
-    status: 0,
+    // cost: 0,
+    // value: 0,
+    // profit: 0,
+    // qty: 0,
+    // status: 0,
     acquired_date: new Date().toISOString().split('T')[0],
     owner_id: user.id,
   }

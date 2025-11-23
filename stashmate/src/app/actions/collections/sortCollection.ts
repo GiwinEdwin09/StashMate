@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabaseClient'
 import type { Tables } from '@/app/types/schema'
 
 type Collection = Tables<'collections'>
-type SortableFields = 'name' | 'category' | 'cost' | 'value' | 'profit' | 'acquired_date' | 'status'
+type SortableFields = 'name' | 'category' | 'acquired_date' 
 type SortOrder = 'asc' | 'desc'
 
 export async function sortCollections(
@@ -13,7 +13,7 @@ export async function sortCollections(
   filters?: {
     search?: string
     category?: string
-    status?: number
+    // status?: number
     owner_id?: string
   }
 ) {
@@ -31,9 +31,9 @@ export async function sortCollections(
       query = query.eq('category', filters.category)
     }
 
-    if (filters?.status !== undefined) {
-      query = query.eq('status', filters.status)
-    }
+    // if (filters?.status !== undefined) {
+    //   query = query.eq('status', filters.status)
+    // }
 
     if (filters?.owner_id) {
       query = query.eq('owner_id', filters.owner_id)
