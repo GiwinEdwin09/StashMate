@@ -31,13 +31,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-<<<<<<< HEAD
+
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-=======
+
     "@types/blueimp-md5": "^2.18.2",
->>>>>>> 51d7e567702b717910c68b7a32bac8c142bcda68
+
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
