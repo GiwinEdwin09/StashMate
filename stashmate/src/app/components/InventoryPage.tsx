@@ -4,6 +4,8 @@ import Collection from "../components/collections";
 import Inventory from "../components/InventoryItem";
 import RevenueGraph from "../components/RevenueGraph";
 
+import { useState } from "react";
+
 export default function InventoryPage({
   onBack,
   refreshRevenue,
@@ -17,6 +19,7 @@ export default function InventoryPage({
   selectedCollectionId: number | null;
   setSelectedCollectionId: (id: number | null) => void;
 }) {
+  const [currentPermission, setCurrentPermission] = useState<string | undefined>('owner');
   return (
     <div
       className="flex"
@@ -26,7 +29,10 @@ export default function InventoryPage({
       }}
     >
       {/* Left sidebar: Collections */}
-      <Collection onSelectCollection={setSelectedCollectionId} />
+      <Collection onSelectCollection={(id, permission) => {
+        setSelectedCollectionId(id);
+        setCurrentPermission(permission);
+      }} />
 
       {/* Right side: inventory + chart */}
       <main
@@ -43,6 +49,7 @@ export default function InventoryPage({
               <Inventory
                 collectionId={selectedCollectionId}
                 onItemUpdate={refreshRevenue}
+                permission={currentPermission}
               />
             </div>
 
