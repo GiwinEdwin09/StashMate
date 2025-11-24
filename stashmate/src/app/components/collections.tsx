@@ -360,7 +360,7 @@ export default function AddCollectionForm({
                           </p>
                           {col.permission && col.permission !== 'owner' && (
                             <span className="badge b-blue text-[0.65rem] px-1.5 py-0.5">
-                              {col.permission}
+                              {col.permission === 'view' ? 'View' : col.permission === 'edit' ? 'Edit' : col.permission}
                             </span>
                           )}
                         </div>
