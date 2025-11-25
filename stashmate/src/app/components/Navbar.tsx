@@ -54,7 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav className="navbar-root">
       <header className="navbar-container">
         <div className="navbar-logo">
-          <Link href="/">StashMate</Link>
+          <Link href="/landing">StashMate</Link>
         </div>
 
         <div className="navbar-actions">
@@ -79,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 )}
                 {showCollectionsLink && (
-                  <Link href="/" className="navbar-dropdown-item">
+                  <Link href="/dashboard" className="navbar-dropdown-item">
                     Collections
                   </Link>
                 )}
