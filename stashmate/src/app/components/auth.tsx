@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from "../../lib/supabaseClient";
 
 export default function Auth() {
+  const router = useRouter();
   const [isSignUp, setSignup] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -100,7 +102,8 @@ export default function Auth() {
           setErrorMessage(signInErr.message);
           return;
         }
-        // Successfully signed in - no need for a message as the user will be redirected
+        // Successfully signed in - redirect to dashboard
+        router.push('/dashboard');
       }
     } catch (error) {
       setErrorMessage('An unexpected error occurred. Please try again.');

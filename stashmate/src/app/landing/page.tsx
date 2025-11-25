@@ -1,9 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check for existing session
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>(".landing-reveal");
 
@@ -39,12 +63,25 @@ export default function LandingPage() {
           </nav>
 
           <div className="landing-nav-cta">
-            <Link href="/" className="landing-btn ghost">
-              Open dashboard
-            </Link>
-            <Link href="/profile" className="landing-btn primary">
-              Get started
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/dashboard" className="landing-btn ghost">
+                  Dashboard
+                </Link>
+                <Link href="/profile" className="landing-btn primary">
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth" className="landing-btn ghost">
+                  Sign in
+                </Link>
+                <Link href="/auth" className="landing-btn primary">
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -67,8 +104,8 @@ export default function LandingPage() {
               </p>
 
               <div className="landing-hero-actions">
-                <Link href="/" className="landing-btn primary large">
-                  Go to app
+                <Link href="/auth" className="landing-btn primary large">
+                  Sign in / Sign up
                 </Link>
                 <a href="#features" className="landing-btn ghost large">
                   View features
@@ -259,12 +296,12 @@ export default function LandingPage() {
               like a pro—no extra tools required.
             </p>
             <div className="landing-hero-actions">
-              <Link href="/" className="landing-btn primary large">
-                Open StashMate
+              <Link href="/auth" className="landing-btn primary large">
+                Sign in / Sign up
               </Link>
-              <Link href="/profile" className="landing-btn ghost large">
-                View profile settings
-              </Link>
+              <a href="#features" className="landing-btn ghost large">
+                View features
+              </a>
             </div>
           </div>
         </section>
