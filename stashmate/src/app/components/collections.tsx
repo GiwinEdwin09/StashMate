@@ -7,6 +7,7 @@ import { deleteCollection } from "../actions/collections/deleteCollection";
 import { createItem } from "../actions/items/createItem";
 import { exportCollectionsWithItems } from "../actions/Export-Import/export";
 import ImportButton from "./importButton";
+import ShareModal from "./ShareModal";
 
 type Collection = {
   id: number;
@@ -21,12 +22,14 @@ type Collection = {
   status: number;
   profit: number;
   owner_id: string;
+  permission?: string;
+  is_owner?: boolean;
 };
 
 export default function AddCollectionForm({
   onSelectCollection,
 }: {
-  onSelectCollection: (id: number) => void;
+  onSelectCollection: (id: number, permission?: string) => void;
 }) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +41,12 @@ export default function AddCollectionForm({
   const [showOverlay, setShowOverlay] = useState(false);
   const [selectedExport, setSelectExprt] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
+
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedCollectionForShare, setSelectedCollectionForShare] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   const [newItem, setNewItem] = useState({
     name: "",
@@ -314,7 +323,7 @@ export default function AddCollectionForm({
                   return (
                     <li
                       key={col.id}
-                      onClick={() => onSelectCollection(col.id)}
+                      onClick={() => onSelectCollection(col.id, col.permission)}
                       className="group flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[#111114] px-3 py-2 hover:border-[var(--brand)] hover:bg-[#15151b] transition-colors cursor-pointer"
                     >
                       {/* Export checkbox */}
@@ -345,9 +354,16 @@ export default function AddCollectionForm({
 
                       {/* Name + category */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-white truncate">
-                          {col.name}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-white truncate">
+                            {col.name}
+                          </p>
+                          {col.permission && col.permission !== 'owner' && (
+                            <span className="badge b-blue text-[0.65rem] px-1.5 py-0.5">
+                              {col.permission === 'view' ? 'View' : col.permission === 'edit' ? 'Edit' : col.permission}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-400 truncate">
                           {col.category || "Uncategorized"}
                         </p>
@@ -398,17 +414,23 @@ export default function AddCollectionForm({
                               >
                                 Rename
                               </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenMenuId(null);
-                                  alert("Share collection coming soon ✨");
-                                }}
-                                className="w-full text-left px-3 py-2 hover:bg-[#15151b] text-gray-200"
-                              >
-                                Share
-                              </button>
+                              {col.is_owner !== false && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuId(null);
+                                    setSelectedCollectionForShare({
+                                      id: col.id,
+                                      name: col.name,
+                                    });
+                                    setShowShareModal(true);
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-[#15151b] text-gray-200"
+                                >
+                                  Share
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -569,6 +591,18 @@ export default function AddCollectionForm({
             &times;
           </button>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && selectedCollectionForShare && (
+        <ShareModal
+          collectionId={selectedCollectionForShare.id}
+          collectionName={selectedCollectionForShare.name}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedCollectionForShare(null);
+          }}
+        />
       )}
     </>
   );

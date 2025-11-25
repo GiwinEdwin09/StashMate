@@ -23,6 +23,7 @@
     "blueimp-md5": "^2.19.0",
     "chart.js": "^4.5.1",
     "json-2-csv": "^5.5.10",
+    "lightningcss": "^1.30.2",
     "next": "^15.5.5",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.1",
@@ -31,13 +32,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-
     "@types/blueimp-md5": "^2.18.2",
-
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -47,6 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
     "jsdom": "^27.2.0",
+    "supabase": "^2.58.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",

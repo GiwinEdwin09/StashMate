@@ -145,6 +145,42 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          collection_id: number
+          id: number
+          permission_level: string
+          user_id: string
+        }
+        Insert: {
+          collection_id: number
+          id?: number
+          permission_level: string
+          user_id: string
+        }
+        Update: {
+          collection_id?: number
+          id?: number
+          permission_level?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissions_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string

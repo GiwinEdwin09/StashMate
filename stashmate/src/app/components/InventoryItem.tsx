@@ -24,12 +24,16 @@ type Item = {
 };
 
 
-export default function Inventory({collectionId, onItemUpdate}: {collectionId: number, onItemUpdate?: () => void}) {
+export default function Inventory({collectionId, onItemUpdate, permission = 'owner'}: {collectionId: number, onItemUpdate?: () => void, permission?: string}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  
+  // Permission check - view-only users cannot edit
+  const isReadOnly = permission === 'view';
+  const canEdit = permission === 'edit' || permission === 'owner';
   const [inventoryValue, setInventoryValue] = useState(0);
   const [potentialProfit, setPotentialProfit] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
@@ -244,7 +248,9 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
           <div className="flex justify-between items-center">
             <button
               onClick={() => setShowForm(true)}
-              className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition"
+              disabled={isReadOnly}
+              className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              title={isReadOnly ? 'You have view-only access' : 'Add new item'}
             >
               + Add Item
             </button>
@@ -348,17 +354,19 @@ export default function Inventory({collectionId, onItemUpdate}: {collectionId: n
                     <button 
                       type="button"
                       onClick={() => handleEdit(item)}
-                      disabled={isLoading}
-                      className="px-3 py-2 rounded transition editbutton"
+                      disabled={isLoading || isReadOnly}
+                      className="px-3 py-2 rounded transition editbutton disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={isReadOnly ? 'View-only access' : 'Edit item'}
                     >
                       Edit
                     </button>
                     <button 
                       type="button"
                       onClick={() => handleDelete(item.id)}
-                      disabled={isLoading}
-                      className="px-3 py-2 rounded transition deletebutton"
+                      disabled={isLoading || isReadOnly}
+                      className="px-3 py-2 rounded transition deletebutton disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ marginLeft: '8px' }}
+                      title={isReadOnly ? 'View-only access' : 'Delete item'}
                     >
                       Delete
                     </button>
