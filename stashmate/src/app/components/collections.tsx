@@ -39,6 +39,8 @@ export default function AddCollectionForm({
   const [success, setSuccess] = useState(false);
 
   const [showOverlay, setShowOverlay] = useState(false);
+
+  const [exportOverlay, setExportOverlay] = useState(false);
   const [selectedExport, setSelectExprt] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -232,19 +234,22 @@ export default function AddCollectionForm({
                 Create, organize, and export your sets.
               </p>
             </div>
-
+            {/* Open Export Overlay*/}
             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-              {/* Export */}
               <button
-                onClick={handleExport}
+                onClick={() => setExportOverlay(true)}
                 disabled={isExporting || collections.length === 0}
                 className="btn"
                 style={{
-                  fontSize: "0.8rem",
                   borderRadius: "999px",
-                  padding: "6px 12px",
+                  paddingInline: "8px",
+                  paddingBlock: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "0.8rem",
                   opacity:
-                    isExporting || collections.length === 0 ? 0.6 : 1,
+                    collections.length === 0 ? 0.6 : 1,
                 }}
                 title={
                   selectedExport.length > 0
@@ -252,12 +257,138 @@ export default function AddCollectionForm({
                     : "Export all collections"
                 }
               >
-                {isExporting
-                  ? "Exporting..."
-                  : selectedExport.length > 0
-                  ? `Export (${selectedExport.length})`
-                  : "Export CSV"}
+                <span>Export CSV</span>
               </button>
+
+              {/* Export Overlay */}
+              {exportOverlay && (
+                <div
+                  className="fixed inset-0 flex justify-center items-center bg-black/60 z-50"
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) setExportOverlay(false);
+                  }}
+                >
+                  <div 
+                    className="card w-[850px]"
+                    style={{
+                        width: "min(520px, 100% - 32px)",
+                        padding: "24px 24px 20px",
+                    }}
+                  >
+                    <div 
+                      className="space" 
+                      style={{
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <div>
+                        <h2
+                          style={{
+                            margin: 0,
+                            fontSize: "1.1rem",
+                          }}
+                        >
+                          Export Collections
+                        </h2>
+                        <p className="muted" style={{ marginTop: "4px" }}>
+                          Select collections to export.
+                        </p>
+                      </div>
+                    </div>
+                    {/* List of collections to export*/}
+                    <ul className="space-y-2 max-h-64 overflow-y-auto mb-6">
+                      {collections.map((col) => {
+                        const isSelected = selectedExport.includes(col.id.toString());
+                        return (
+                          <li
+                            key={col.id}
+                            className="group flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[#111114] px-3 py-2 hover:border-[var(--brand)] hover:bg-[#15151b] transition-colors cursor-pointer"
+                          >
+                            {/* Checkboxes */}
+                            <button
+                              onClick={(e) => specificExprtClick(e, col.id)}
+                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                isSelected
+                                  ? "bg-blue-600 border-blue-600"
+                                  : "border-gray-500"
+                              }`}
+                            >
+                              {isSelected && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={3}
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              )}
+                            </button>
+                            {/* Collections Info */}
+                            <div className="flex-1">
+                              <p className="font-medium text-white">{col.name}</p>
+                              <p className="text-xs text-gray-400">
+                                {col.category || "Uncategorized"}
+                              </p>
+                            </div>
+                            <div className="flex-shrink-0">
+                              <span className="badge b-zinc text-[0.7rem] whitespace-nowrap">
+                                {col.acquired_date
+                                  ? new Date(
+                                      col.acquired_date
+                                    ).toLocaleDateString()
+                                  : "No date"}
+                              </span>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    {/* Export Overlay Buttons */}
+                    <div
+                      className="space"
+                      style={{ marginTop: "18px", justifyContent: "flex-end" }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setShowOverlay(false)}
+                        className="btn"
+                        style={{
+                          borderRadius: "999px",
+                          paddingInline: "14px",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleExport}
+                        type="submit"
+                        disabled={isLoading}
+                        style={{
+                          borderRadius: "999px",
+                          paddingInline: "16px",
+                          fontSize: "0.9rem",
+                          opacity: isExporting ? 0.6 : 1,
+                        }}
+                        className="btn primary"
+                      >
+                        {isExporting
+                          ? "Exporting..."
+                          : selectedExport.length > 0
+                          ? `Export (${selectedExport.length})`
+                          : "Export CSV"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Import */}
               <ImportButton onImportComplete={fetchCollections} />
@@ -326,31 +457,6 @@ export default function AddCollectionForm({
                       onClick={() => onSelectCollection(col.id, col.permission)}
                       className="group flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[#111114] px-3 py-2 hover:border-[var(--brand)] hover:bg-[#15151b] transition-colors cursor-pointer"
                     >
-                      {/* Export checkbox */}
-                      <button
-                        onClick={(e) => specificExprtClick(e, col.id)}
-                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                          isSelected
-                            ? "bg-blue-600 border-blue-600"
-                            : "border-gray-500 hover:border-blue-400"
-                        }`}
-                      >
-                        {isSelected && (
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </button>
 
                       {/* Name + category */}
                       <div className="flex-1 min-w-0">
@@ -463,7 +569,8 @@ export default function AddCollectionForm({
             if (e.target === e.currentTarget) {
               setShowOverlay(false);
             }
-          }}
+          }
+        }
         >
           <div
             className="card"
@@ -486,17 +593,6 @@ export default function AddCollectionForm({
                   Name and categorize your new stash.
                 </p>
               </div>
-              <button
-                onClick={() => setShowOverlay(false)}
-                className="btn"
-                style={{
-                  borderRadius: "999px",
-                  paddingInline: "10px",
-                  fontSize: "0.8rem",
-                }}
-              >
-                Close
-              </button>
             </div>
 
             <form onSubmit={handleSubmit}>
