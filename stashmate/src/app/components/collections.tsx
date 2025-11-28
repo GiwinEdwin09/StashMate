@@ -24,6 +24,7 @@ type Collection = {
   owner_id: string;
   permission?: string;
   is_owner?: boolean;
+  owner_name?: string;
 };
 
 export default function AddCollectionForm({
@@ -61,6 +62,7 @@ export default function AddCollectionForm({
   });
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [currentSelection, setCurrentSelection] = useState<number | null>(null);
 
   const fetchCollections = async () => {
     setIsLoading(true);
@@ -118,6 +120,10 @@ export default function AddCollectionForm({
     const result = await deleteCollection(id);
 
     if (result.success) {
+      // If deleting the currently selected collection, clear selection
+      if (currentSelection === id) {
+        setCurrentSelection(null);
+      }
       await fetchCollections();
     } else {
       setError(result.error || "Failed to delete collection");
@@ -125,6 +131,11 @@ export default function AddCollectionForm({
 
     setDeletingId(null);
   }
+
+  const handleCollectionClick = (id: number, permission?: string) => {
+    setCurrentSelection(id);
+    onSelectCollection(id, permission);
+  };
 
   const specificExprtClick = (
     e: React.MouseEvent,
@@ -451,12 +462,17 @@ export default function AddCollectionForm({
                     col.id.toString()
                   );
                   const isMenuOpen = openMenuId === col.id;
+                  const isCurrentSelection = currentSelection === col.id;
 
                   return (
                     <li
                       key={col.id}
-                      onClick={() => onSelectCollection(col.id, col.permission)}
-                      className="group flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[#111114] px-3 py-2 hover:border-[var(--brand)] hover:bg-[#15151b] transition-colors cursor-pointer"
+                      onClick={() => handleCollectionClick(col.id, col.permission)}
+                      className="group flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors cursor-pointer"
+                      style={{
+                        borderColor: isCurrentSelection ? 'var(--brand)' : 'var(--border)',
+                        backgroundColor: isCurrentSelection ? 'rgba(16, 185, 129, 0.15)' : '#111114',
+                      }}
                     >
 
                       {/* Name + category */}
@@ -473,6 +489,9 @@ export default function AddCollectionForm({
                         </div>
                         <p className="text-xs text-gray-400 truncate">
                           {col.category || "Uncategorized"}
+                          {col.permission && col.permission !== 'owner' && col.owner_name && (
+                            <span className="text-gray-500"> • Shared by {col.owner_name}</span>
+                          )}
                         </p>
                       </div>
 
