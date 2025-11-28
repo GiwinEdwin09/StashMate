@@ -44,13 +44,35 @@ export async function getCollections() {
     if (sharedError) {
       console.log('Shared collections error:', sharedError)
     } else if (sharedCollectionsData) {
-      // Map permission levels to collections
+      // Get unique owner IDs
+      const ownerIds = [...new Set(sharedCollectionsData.map(c => c.owner_id))]
+      
+      // Fetch owner information from users table
+      const { data: ownerData, error: ownerError } = await supabase
+        .from('users')
+        .select('id, email')
+        .in('id', ownerIds)
+      
+      if (ownerError) {
+        console.log('Error fetching owner data:', ownerError)
+      }
+      
+      // Create a map of owner IDs to emails
+      const ownerMap = new Map()
+      if (ownerData) {
+        ownerData.forEach(owner => {
+          ownerMap.set(owner.id, owner.email || 'Unknown User')
+        })
+      }
+      
+      // Map permission levels and owner names to collections
       sharedCollections = sharedCollectionsData.map(col => {
         const perm = permissions.find(p => p.collection_id === col.id)
         return {
           ...col,
           permission: perm?.permission_level || 'view',
           is_owner: false,
+          owner_name: ownerMap.get(col.owner_id) || 'Unknown User',
         }
       })
     }

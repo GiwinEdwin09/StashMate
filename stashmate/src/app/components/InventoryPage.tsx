@@ -3,8 +3,9 @@
 import Collection from "../components/collections";
 import Inventory from "../components/InventoryItem";
 import RevenueGraph from "../components/RevenueGraph";
+import { getCollectionOwner } from '../actions/collections/getSharedCollectionOwner'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function InventoryPage({
   onBack,
@@ -20,21 +21,40 @@ export default function InventoryPage({
   setSelectedCollectionId: (id: number | null) => void;
 }) {
   const [currentPermission, setCurrentPermission] = useState<string | undefined>('owner');
+  const [ownerName, setOwnerName] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    async function fetchOwnerInfo() {
+      if (!selectedCollectionId) {
+        setOwnerName(undefined);
+        return;
+      }
+
+      const result = await getCollectionOwner(selectedCollectionId);
+      
+      if (result.data?.owner_name) {
+        setOwnerName(result.data.owner_name);
+      } else {
+        setOwnerName(undefined);
+      }
+    }
+
+    fetchOwnerInfo();
+  }, [selectedCollectionId]);
+
   return (
     <div
       className="flex"
       style={{
-        paddingTop: "80px", // match navbar height
+        paddingTop: "80px",
         height: "calc(100vh - 80px)",
       }}
     >
-      {/* Left sidebar: Collections */}
       <Collection onSelectCollection={(id, permission) => {
         setSelectedCollectionId(id);
         setCurrentPermission(permission);
       }} />
 
-      {/* Right side: inventory + chart */}
       <main
         style={{
           flex: 1,
@@ -50,6 +70,7 @@ export default function InventoryPage({
                 collectionId={selectedCollectionId}
                 onItemUpdate={refreshRevenue}
                 permission={currentPermission}
+                ownerName={ownerName}
               />
             </div>
 

@@ -24,7 +24,7 @@ type Item = {
 };
 
 
-export default function Inventory({collectionId, onItemUpdate, permission = 'owner'}: {collectionId: number, onItemUpdate?: () => void, permission?: string}) {
+export default function Inventory({collectionId, onItemUpdate, permission = 'owner', ownerName}: {collectionId: number, onItemUpdate?: () => void, permission?: string, ownerName?: string}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
@@ -241,6 +241,15 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
             </label>
             <p className="text-base font-semibold">${totalProfit.toFixed(2)}</p>
           </div>
+
+          {ownerName && permission !== 'owner' && (
+            <div className="w-64 h-20 p-3 rounded-lg shadow border card">
+              <div className="flex flex-col">
+                <span className="text-xs" style={{ opacity: 0.6 }}>Shared by</span>
+                <span className="text-sm font-medium">{ownerName}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Buttons & Sort/Search */}
