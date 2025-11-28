@@ -274,6 +274,7 @@ export default function AddCollectionForm({
                         width: "min(520px, 100% - 32px)",
                         padding: "24px 24px 20px",
                     }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <div 
                       className="space" 
@@ -357,7 +358,7 @@ export default function AddCollectionForm({
                     >
                       <button
                         type="button"
-                        onClick={() => setShowOverlay(false)}
+                        onClick={() => setExportOverlay(false)}
                         className="btn"
                         style={{
                           borderRadius: "999px",

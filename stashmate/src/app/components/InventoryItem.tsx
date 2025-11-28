@@ -34,6 +34,9 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
   // Permission check - view-only users cannot edit
   const isReadOnly = permission === 'view';
   const canEdit = permission === 'edit' || permission === 'owner';
+
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionCategory, setCollectionCategory] = useState("");
   const [inventoryValue, setInventoryValue] = useState(0);
   const [potentialProfit, setPotentialProfit] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
@@ -116,6 +119,23 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+  async function fetchCollectionInfo() {
+    const { data, error } = await supabase
+      .from("collections")
+      .select("name, category")
+      .eq("id", collectionId)
+      .single();
+
+    if (!error && data) {
+      setCollectionName(data.name);
+      setCollectionCategory(data.category);
+    }
+  }
+
+  fetchCollectionInfo();
+}, [collectionId]);
 
   useEffect(() => {
     setSearchQuery('');
@@ -211,6 +231,12 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '1rem', width: '100%' }}>
+
+        {/* Collections Info */}
+        <div className="flex-1 mb-4">
+          <p className="font-semibold text-xl">{collectionName}</p>
+          <p className="text-md text-gray-400">{collectionCategory}</p>
+        </div>
 
         {/* Statistics */}
         <div className="flex gap-4 mb-4">
