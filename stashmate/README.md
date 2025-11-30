@@ -1,9 +1,43 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stashmate
+## Project Overview
+
+**Authors:** Mila Kuang, Michelle Tan, Jackson Zheng, James Conrad Manlangit, Giwin Edwin Omesh
+
+StashMate is a smart inventory and revenue dashboard for collectors and vendors. Track what you own, what it's worth, and how fast it's selling—without fighting with spreadsheets.
+
+## Features
+- Add and edit inventory items with various attributes, grouped into collections
+- Create, rename, and delete collections to organize your items
+- Share collections with other users, granting view or edit permissions
+- Export collections and items to CSV for easy backup or analysis
+- Import collections and items from CSV files
+- Permission-based access: restrict actions for view-only users
+- Modern, responsive UI with sidebar navigation and modals
+- Track item details such as condition, cost, value, source, and acquisition date
+- Real-time updates and secure authentication via Supabase
+
+
+## Prerequisites
+- Node.js (v18 or newer recommended)
+- Npm (comes with Node.js) or yarn
+- Npm dependencies (Installed during setup)
+
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -15,27 +49,4 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# StashMate
-CSE 115A - StashMate
->>>>>>> a94cbc6a7a38a54ec6948f1037abe788fd4f0ed1
+Open [http://localhost:3000](http://localhost:3000) with your browser to view Stashmate
