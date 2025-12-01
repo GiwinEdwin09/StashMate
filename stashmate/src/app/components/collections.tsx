@@ -8,6 +8,7 @@ import { createItem } from "../actions/items/createItem";
 import { exportCollectionsWithItems } from "../actions/Export-Import/export";
 import ImportButton from "./importButton";
 import ShareModal from "./ShareModal";
+import RenameCollectionModal from "./renameCollection";
 
 type Collection = {
   id: number;
@@ -51,6 +52,12 @@ export default function AddCollectionForm({
     name: string;
   } | null>(null);
 
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [selectedCollectionForRename, setSelectedCollectionForRename] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
   const [newItem, setNewItem] = useState({
     name: "",
     condition: "",
@@ -76,6 +83,12 @@ export default function AddCollectionForm({
     }
 
     setIsLoading(false);
+  };
+  
+  const handleRenameSuccess = async () => {
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 4000);
+    await fetchCollections();
   };
 
   useEffect(() => {
@@ -527,19 +540,23 @@ export default function AddCollectionForm({
                             ⋯
                           </button>
 
-                          {isMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-40 rounded-md border border-[var(--border)] bg-[#111114] shadow-lg z-20 text-sm overflow-hidden">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenMenuId(null);
-                                  alert("Rename collection not set yet");
-                                }}
-                                className="w-full text-left px-3 py-2 hover:bg-[#15151b] text-gray-200"
-                              >
-                                Rename
-                              </button>
+                            {isMenuOpen && (
+                              <div className="absolute right-0 mt-2 w-40 rounded-md border border-[var(--border)] bg-[#111114] shadow-lg z-20 text-sm overflow-hidden">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuId(null);
+                                    setSelectedCollectionForRename({
+                                      id: col.id,
+                                      name: col.name,
+                                    });
+                                    setShowRenameModal(true);
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-[#15151b] text-gray-200"
+                                >
+                                  Rename
+                                </button>
                               {col.is_owner !== false && (
                                 <button
                                   type="button"
@@ -720,6 +737,15 @@ export default function AddCollectionForm({
           }}
         />
       )}
+      <RenameCollectionModal
+        isOpen={showRenameModal}
+        onClose={() => {
+          setShowRenameModal(false);
+          setSelectedCollectionForRename(null);
+        }}
+        collection={selectedCollectionForRename}
+        onRenameSuccess={handleRenameSuccess}
+      />
     </>
   );
 }
