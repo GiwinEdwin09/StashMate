@@ -3,7 +3,6 @@
 import { supabase } from '@/lib/supabaseClient'
 import type { Tables } from '@/app/types/schema'
 
-type Collection = Tables<'collections'>
 type SortableFields = 'name' | 'category' | 'acquired_date' 
 type SortOrder = 'asc' | 'desc'
 
