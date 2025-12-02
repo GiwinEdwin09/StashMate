@@ -18,6 +18,29 @@ function toString(value: any, defaultValue: string = ''): string {
   return String(value).trim()
 }
 
+// convert status text to numbers
+function statusToNumber(value: any): number {
+  if (value === null || value === undefined || value === '') {
+    return 0
+  }
+  
+  const statusText = String(value).toLowerCase()
+  
+  switch(statusText) {
+    case 'listed':
+    case '0':
+      return 0
+    case 'in stock':
+    case '1':
+      return 1
+    case 'sold':
+    case '2':
+      return 2
+    default:
+      return 0
+  }
+}
+
 export async function importCollectionsWithItems(csvContent: string) {
   const supabase = await createClient()
   
@@ -42,10 +65,7 @@ export async function importCollectionsWithItems(csvContent: string) {
         collections.set(key, {
           name: toString(row.collection_name),
           category: toString(row.collection_category),
-          // cond: toString(row.collection_cond) || null,
-          // source: toString(row.collection_source) || null,
           acquired_date: row.collection_acquired_date,
-          // status: toNumber(row.collection_status, 0),
           items: []
         })
       }
@@ -64,10 +84,10 @@ export async function importCollectionsWithItems(csvContent: string) {
           price: price,
           profit: profit,
           source: toString(row.item_source),
-          status: toNumber(row.item_status, 0),
+          status: statusToNumber(row.item_status),
           quantity: quantity,
           image_url: toString(row.item_image_url),
-          created_at: new Date().toISOString(),
+          created_at: new Date().toLocaleDateString('en-CA'),
         })
       }
     })
@@ -76,11 +96,6 @@ export async function importCollectionsWithItems(csvContent: string) {
 
     for (const [key, collection] of collections) {
       const items = collection.items
-      /* https://www.geeksforgeeks.org/typescript/typescript-array-reduce-method/ */
-      // const collectionQty = items.reduce((sum: any, item: { quantity: any }) => sum + item.quantity, 0)
-      // const collectionCost = items.reduce((sum: number, item: { cost: number; quantity: number }) => sum + (item.cost * item.quantity), 0)
-      // const collectionValue = items.reduce((sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity), 0)
-      // const collectionProfit = collectionValue - collectionCost
       
       delete collection.items
 
@@ -99,10 +114,6 @@ export async function importCollectionsWithItems(csvContent: string) {
           .from('collections')
           .update({
             category: collection.category,
-            // qty: collectionQty,
-            // cost: collectionCost,
-            // value: collectionValue,
-            // profit: collectionProfit,
           })
           .eq('id', existingCollection.id)
 
@@ -118,10 +129,6 @@ export async function importCollectionsWithItems(csvContent: string) {
           .from('collections')
           .insert({ 
             ...collection,
-            // qty: collectionQty,
-            // cost: collectionCost,
-            // value: collectionValue,
-            // profit: collectionProfit,
             owner_id: user.id 
           })
           .select()
@@ -147,6 +154,7 @@ export async function importCollectionsWithItems(csvContent: string) {
           })))
 
         if (itemsError) {
+          console.error('Items insert error:', itemsError)
           return {error: 'failed to insert new item from the csv import'}
         }
       }
@@ -158,6 +166,7 @@ export async function importCollectionsWithItems(csvContent: string) {
     }
 
   } catch (error) {
+    console.error('Import error:', error)
     return {error: 'Failed to import CSV'}
   }
 }
