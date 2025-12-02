@@ -294,8 +294,8 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                 onClick={() => setShowFilters(!showFilters)}
               className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
               style={{
-                border: '1px solid var(--border)',
-                background: 'black',        // <- always black
+                border: '1px solid var(--accent)',
+                background: 'var(--border)',        // <- always black
                 color: 'white',             // <- readable text
                 padding: '8px 16px',
                 borderRadius: '10px',

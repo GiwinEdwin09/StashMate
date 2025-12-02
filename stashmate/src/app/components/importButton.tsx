@@ -56,8 +56,8 @@ export default function ImportButton({onImportComplete}: ImportButtonProps) {
         className={`
           inline-flex items-center px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer transition-colors mr-3
           ${isImporting 
-            ? 'bg-gray-600 cursor-not-allowed' 
-            : 'bg-purple-600 hover:bg-purple-700 text-white'
+            ? 'bg-gray-700 cursor-not-allowed' 
+            : 'bg-purple-700 hover:bg-purple-800 text-white'
           }
         `}
       >

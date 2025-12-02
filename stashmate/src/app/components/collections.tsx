@@ -263,15 +263,8 @@ export default function AddCollectionForm({
               <button
                 onClick={() => setExportOverlay(true)}
                 disabled={isExporting || collections.length === 0}
-                className="btn"
+                className="inline-flex items-center px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer transition-colors mr-3 bg-sky-700 hover:bg-sky-800 text-white"
                 style={{
-                  borderRadius: "999px",
-                  paddingInline: "8px",
-                  paddingBlock: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "0.8rem",
                   opacity:
                     collections.length === 0 ? 0.6 : 1,
                 }}
@@ -421,31 +414,11 @@ export default function AddCollectionForm({
               {/* New collection */}
               <button
                 onClick={() => setShowOverlay(true)}
-                className="btn primary"
+                className="inline-flex items-center px-3 py-1.5 text-xs rounded-xl font-medium cursor-pointer transition-colors mr-3 bg-emerald-600 hover:bg-emerald-700 text-white"
                 style={{
-                  borderRadius: "999px",
-                  paddingInline: "8px",
-                  paddingBlock: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "0.8rem",
                 }}
               >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "999px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#05220f",
-                  }}
-                >
-                  +
-                </span>
-                <span>New</span>
+                <span>+ New</span>
               </button>
             </div>
           </div>
