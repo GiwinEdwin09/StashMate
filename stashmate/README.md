@@ -50,3 +50,8 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to view Stashmate
+
+
+## Documentations
+
+https://drive.google.com/drive/folders/112o5wKspAGc8dQXaTKgDQikroT_dy0H5?dmr=1&ec=wgc-drive-globalnav-goto
