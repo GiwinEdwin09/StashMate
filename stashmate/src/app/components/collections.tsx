@@ -484,14 +484,16 @@ export default function AddCollectionForm({
                       className="group flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors cursor-pointer"
                       style={{
                         borderColor: isCurrentSelection ? 'var(--brand)' : 'var(--border)',
-                        backgroundColor: isCurrentSelection ? 'rgba(16, 185, 129, 0.15)' : '#111114',
+                        backgroundColor: isCurrentSelection
+                          ? 'rgba(16, 185, 129, 0.15)' // green tint when selected
+                          : 'var(--panel)',             
                       }}
                     >
 
                       {/* Name + category */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-white truncate">
+                          <p className="font-medium truncate">
                             {col.name}
                           </p>
                           {col.permission && col.permission !== 'owner' && (
@@ -500,13 +502,14 @@ export default function AddCollectionForm({
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="text-xs muted truncate">
                           {col.category || "Uncategorized"}
                           {col.permission && col.permission !== 'owner' && col.owner_name && (
-                            <span className="text-gray-500"> • Shared by {col.owner_name}</span>
+                            <span> • Shared by {col.owner_name}</span>
                           )}
                         </p>
                       </div>
+
 
                       {/* Meta: date + action menu */}
                       <div className="flex items-center gap-2 flex-shrink-0">

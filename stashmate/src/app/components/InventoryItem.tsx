@@ -290,21 +290,21 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               + Add Item
             </button>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
               className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
               style={{
                 border: '1px solid var(--border)',
-                background: 'black',        // <- always black
-                color: 'white',             // <- readable text
+                background: 'var(--panel)',
+                color: 'var(--text)',          
                 padding: '8px 16px',
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
-              >
-                Filters
-              </button>
+            >
+              Filters
+            </button>
               <select
                 value={searchField}
                 onChange={(e) => setSearchField(e.target.value as SearchField)}
@@ -349,25 +349,14 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
           }}
         >
           <div
-            className="rounded-lg shadow-xl p-6 w-full max-w-md"
-            style={{
-              background: 'var(--panel)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)'
-            }}
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Filter Items</h2>
+              <h2 className="text-xl font-semibold">Filter Items</h2>
               <button
                 onClick={() => setShowFilters(false)}
-                className="text-2xl leading-none"
-                style={{
-                  color: 'var(--muted)',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--muted)'}
+                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
                 aria-label="Close"
               >
                 ×
@@ -378,14 +367,14 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               {/* Cost Range */}
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Cost Range</h3>
-                  <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <h3 className="text-sm font-medium text-gray-700">Cost Range</h3>
+                  <span className="text-xs text-gray-500">
                     ${Math.round(priceFilters.minCost ?? 0)} - ${Math.round(priceFilters.maxCost ?? maxCost)}
                   </span>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="minCost" className="block text-xs mb-2" style={{ color: 'var(--muted)' }}>
+                    <label htmlFor="minCost" className="block text-xs text-gray-600 mb-2">
                       Min Cost: ${Math.round(priceFilters.minCost ?? 0)}
                     </label>
                     <input
@@ -411,7 +400,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     />
                   </div>
                   <div>
-                    <label htmlFor="maxCost" className="block text-xs mb-2" style={{ color: 'var(--muted)' }}>
+                    <label htmlFor="maxCost" className="block text-xs text-gray-600 mb-2">
                       Max Cost: ${Math.round(priceFilters.maxCost ?? maxCost)}
                     </label>
                     <input
@@ -442,14 +431,14 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               {/* Price Range */}
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Price Range</h3>
-                  <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                  <h3 className="text-sm font-medium text-gray-700">Price Range</h3>
+                  <span className="text-xs text-gray-500">
                     ${Math.round(priceFilters.minPrice ?? 0)} - ${Math.round(priceFilters.maxPrice ?? maxPrice)}
                   </span>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="minPrice" className="block text-xs mb-2" style={{ color: 'var(--muted)' }}>
+                    <label htmlFor="minPrice" className="block text-xs text-gray-600 mb-2">
                       Min Price: ${Math.round(priceFilters.minPrice ?? 0)}
                     </label>
                     <input
@@ -475,7 +464,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     />
                   </div>
                   <div>
-                    <label htmlFor="maxPrice" className="block text-xs mb-2" style={{ color: 'var(--muted)' }}>
+                    <label htmlFor="maxPrice" className="block text-xs text-gray-600 mb-2">
                       Max Price: ${Math.round(priceFilters.maxPrice ?? maxPrice)}
                     </label>
                     <input
@@ -515,27 +504,13 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     maxPrice: undefined,
                   });
                 }}
-                className="flex-1 px-4 py-2 rounded-md transition"
-                style={{
-                  border: '1px solid var(--border)',
-                  background: 'var(--accent)',
-                  color: 'var(--text)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--panel)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
               >
                 Clear Filters
               </button>
               <button
                 onClick={() => setShowFilters(false)}
-                className="flex-1 px-4 py-2 rounded-md transition"
-                style={{
-                  background: 'var(--brand)',
-                  color: '#05220f',
-                  border: '1px solid #1aa14c'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
               >
                 Apply Filters
               </button>
