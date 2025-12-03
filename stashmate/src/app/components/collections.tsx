@@ -418,23 +418,6 @@ export default function AddCollectionForm({
                 style={{
                 }}
               >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "999px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#000000",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    lineHeight: "1",
-                  }}
-                >
-                  +
-                </span>
                 <span>New</span>
               </button>
             </div>
