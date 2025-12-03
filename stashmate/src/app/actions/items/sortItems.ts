@@ -1,8 +1,8 @@
 'use server'
 
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/server'
 
-type SortableFields = 'name' | 'price' | 'profit' | 'source' | 'status' | 'created_at' | 'status' | 'condition' | 'cost'
+type SortableFields = 'name' | 'price' | 'cost' | 'profit' | 'source' | 'status' | 'created_at' | 'condition'
 type SortOrder = 'asc' | 'desc'
 
 export async function sortItems(
@@ -16,6 +16,17 @@ export async function sortItems(
   }
 ) {
   try {
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return { 
+        success: false, 
+        error: 'You must be logged in',
+        data: []
+      }
+    }
    
     let query = supabase
       .from('items')
@@ -46,7 +57,7 @@ export async function sortItems(
 
     return { 
       success: true, 
-      data,
+      data: data || [],
       sortedBy: sortBy,
       sortOrder 
     }

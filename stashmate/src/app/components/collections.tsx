@@ -440,7 +440,11 @@ export default function AddCollectionForm({
                     borderRadius: "999px",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "#05220f",
+                    background: "#000000",
+                    color: "#ffffff",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    lineHeight: "1",
                   }}
                 >
                   +

@@ -10,11 +10,16 @@ export type PriceFilters = {
   maxPrice?: number
 }
 
+type SortableFields = 'name' | 'price' | 'cost' | 'profit' | 'source' | 'status' | 'created_at' | 'condition'
+type SortOrder = 'asc' | 'desc'
+
 export async function searchItems(
   collectionId: number, 
   searchQuery: string, 
   searchField?: SearchField,
-  filters?: PriceFilters
+  filters?: PriceFilters,
+  sortBy: SortableFields = 'created_at',
+  sortOrder: SortOrder = 'desc'
 ) {
   try {
     const supabase = await createClient()
@@ -29,11 +34,12 @@ export async function searchItems(
       }
     }
 
+    const ascending = sortOrder === 'asc'
     let query = supabase
       .from('items')
       .select('*')
       .eq('collection_id', collectionId)
-      .order('created_at', { ascending: false })
+      .order(sortBy, { ascending })
 
     // If search query is provided, filter results
     if (searchQuery && searchQuery.trim()) {

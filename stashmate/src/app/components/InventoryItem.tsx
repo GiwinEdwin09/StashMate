@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createItem } from '../actions/items/createItem'
 import { deleteItem } from '../actions/items/deleteItem'
 import { updateItem } from '../actions/items/updateItem'
 import { searchItems, type SearchField, type PriceFilters } from '../actions/items/searchItems'
-import { supabase } from "@/lib/supabaseClient";
+import { getItemsByCollection } from '../actions/items/getItemByCollection'
+import { getCollectionInfo } from '../actions/collections/getCollectionInfo'
 import './style.css';
 
 type Item = {
@@ -53,6 +54,8 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
   });
   const [maxCost, setMaxCost] = useState(1000);
   const [maxPrice, setMaxPrice] = useState(1000);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'cost'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const getStatusText = (status: number): string => {
     switch (status) {
@@ -67,7 +70,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
     }
   };
 
-  const fetchItems = async (searchTerm: string = '') => {
+  const fetchItems = useCallback(async (searchTerm: string = '') => {
     setIsLoading(true);
     
     const hasFilters = priceFilters.minCost !== undefined || 
@@ -76,7 +79,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                       priceFilters.maxPrice !== undefined;
     
     if (searchTerm.trim() || hasFilters) {
-      const result = await searchItems(collectionId, searchTerm, searchField, priceFilters);
+      const result = await searchItems(collectionId, searchTerm, searchField, priceFilters, sortBy, sortOrder);
       if (result.success && result.data) {
         setItems(result.data);
         setInventoryValue(result.data.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0));
@@ -96,46 +99,41 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
         setItems([]);
       }
     } else {
-      const { error: fetchItemErr, data } = await supabase.from('items').select('*').eq('collection_id', collectionId);
-      if (fetchItemErr) {
-        console.error("Error fetching items");
+      const result = await getItemsByCollection(collectionId, sortBy, sortOrder);
+      if (result.error) {
+        console.error("Error fetching items:", result.error);
         setErrorMessage("Error fetching items");
         setItems([]);
-      } else {
-        setItems(data || []);
-        setInventoryValue((data || []).reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0));
-        const unsoldItems = (data || []).filter(item => item.status !== 2);
-        const soldItems = (data || []).filter(item => item.status === 2);
+      } else if (result.data) {
+        setItems(result.data);
+        setInventoryValue(result.data.reduce((sum, item) => sum + ((item.cost || 0) * (item.quantity || 1)), 0));
+        const unsoldItems = result.data.filter(item => item.status !== 2);
+        const soldItems = result.data.filter(item => item.status === 2);
         setPotentialProfit(unsoldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
         setTotalProfit(soldItems.reduce((sum, item) => sum + (item.profit || 0), 0));
         
-        if (data && data.length > 0) {
-          const costs = data.map(item => item.cost || 0);
-          const prices = data.map(item => item.price || 0);
+        if (result.data.length > 0) {
+          const costs = result.data.map(item => item.cost || 0);
+          const prices = result.data.map(item => item.price || 0);
           setMaxCost(Math.max(...costs, 1000));
           setMaxPrice(Math.max(...prices, 1000));
         }
       }
     }
     setIsLoading(false);
-  };
+  }, [collectionId, searchField, priceFilters, sortBy, sortOrder]);
 
   useEffect(() => {
-  async function fetchCollectionInfo() {
-    const { data, error } = await supabase
-      .from("collections")
-      .select("name, category")
-      .eq("id", collectionId)
-      .single();
-
-    if (!error && data) {
-      setCollectionName(data.name);
-      setCollectionCategory(data.category);
+    async function fetchCollectionInfo() {
+      const result = await getCollectionInfo(collectionId);
+      if (!result.error && result.data) {
+        setCollectionName(result.data.name);
+        setCollectionCategory(result.data.category);
+      }
     }
-  }
 
-  fetchCollectionInfo();
-}, [collectionId]);
+    fetchCollectionInfo();
+  }, [collectionId]);
 
   useEffect(() => {
     setSearchQuery('');
@@ -155,7 +153,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchField, priceFilters]);
+  }, [searchQuery, searchField, priceFilters, sortBy, sortOrder, fetchItems]);
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -290,21 +288,57 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               + Add Item
             </button>
             <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              style={{
-                border: '1px solid var(--border)',
-                background: 'var(--panel)',
-                color: 'var(--text)',          
-                padding: '8px 16px',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              Filters
-            </button>
+              {/* Sort Controls */}
+              <div className="flex items-center gap-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'cost')}
+                  className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  style={{
+                    border: '1px solid var(--border)',
+                    background: 'var(--panel)',
+                    color: 'var(--text)',
+                    minWidth: '120px',
+                    cursor: 'pointer'
+                  }}
+                  disabled={isLoading}
+                >
+                  <option value="name">Sort by Name</option>
+                  <option value="price">Sort by Price</option>
+                  <option value="cost">Sort by Cost</option>
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  style={{
+                    border: '1px solid var(--border)',
+                    background: 'var(--panel)',
+                    color: 'var(--text)',
+                    padding: '8px 12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  disabled={isLoading}
+                  title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                >
+                  {sortOrder === 'asc' ? '↑' : '↓'}
+                </button>
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                style={{
+                  border: '1px solid var(--border)',
+                  background: 'var(--panel)',
+                  color: 'var(--text)',          
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Filters
+              </button>
               <select
                 value={searchField}
                 onChange={(e) => setSearchField(e.target.value as SearchField)}
@@ -349,14 +383,25 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
           }}
         >
           <div
-            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+            className="rounded-lg shadow-xl p-6 w-full max-w-md"
+            style={{
+              backgroundColor: 'var(--panel)',
+              border: '1px solid var(--border)',
+              color: 'var(--text)'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Filter Items</h2>
+              <h2 className="text-xl font-semibold" style={{ color: 'var(--text)' }}>Filter Items</h2>
               <button
                 onClick={() => setShowFilters(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+                className="text-2xl leading-none"
+                style={{ 
+                  color: 'var(--text)',
+                  opacity: 0.7
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                 aria-label="Close"
               >
                 ×
@@ -367,14 +412,14 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               {/* Cost Range */}
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-sm font-medium text-gray-700">Cost Range</h3>
-                  <span className="text-xs text-gray-500">
+                  <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Cost Range</h3>
+                  <span className="text-xs" style={{ color: 'var(--text)', opacity: 0.7 }}>
                     ${Math.round(priceFilters.minCost ?? 0)} - ${Math.round(priceFilters.maxCost ?? maxCost)}
                   </span>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="minCost" className="block text-xs text-gray-600 mb-2">
+                    <label htmlFor="minCost" className="block text-xs mb-2" style={{ color: 'var(--text)', opacity: 0.8 }}>
                       Min Cost: ${Math.round(priceFilters.minCost ?? 0)}
                     </label>
                     <input
@@ -400,7 +445,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     />
                   </div>
                   <div>
-                    <label htmlFor="maxCost" className="block text-xs text-gray-600 mb-2">
+                    <label htmlFor="maxCost" className="block text-xs mb-2" style={{ color: 'var(--text)', opacity: 0.8 }}>
                       Max Cost: ${Math.round(priceFilters.maxCost ?? maxCost)}
                     </label>
                     <input
@@ -431,14 +476,14 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
               {/* Price Range */}
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-sm font-medium text-gray-700">Price Range</h3>
-                  <span className="text-xs text-gray-500">
+                  <h3 className="text-sm font-medium" style={{ color: 'var(--text)' }}>Price Range</h3>
+                  <span className="text-xs" style={{ color: 'var(--text)', opacity: 0.7 }}>
                     ${Math.round(priceFilters.minPrice ?? 0)} - ${Math.round(priceFilters.maxPrice ?? maxPrice)}
                   </span>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="minPrice" className="block text-xs text-gray-600 mb-2">
+                    <label htmlFor="minPrice" className="block text-xs mb-2" style={{ color: 'var(--text)', opacity: 0.8 }}>
                       Min Price: ${Math.round(priceFilters.minPrice ?? 0)}
                     </label>
                     <input
@@ -464,7 +509,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     />
                   </div>
                   <div>
-                    <label htmlFor="maxPrice" className="block text-xs text-gray-600 mb-2">
+                    <label htmlFor="maxPrice" className="block text-xs mb-2" style={{ color: 'var(--text)', opacity: 0.8 }}>
                       Max Price: ${Math.round(priceFilters.maxPrice ?? maxPrice)}
                     </label>
                     <input
@@ -504,13 +549,34 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                     maxPrice: undefined,
                   });
                 }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+                className="flex-1 px-4 py-2 rounded-md transition"
+                style={{
+                  border: '1px solid var(--border)',
+                  background: 'var(--panel)',
+                  color: 'var(--text)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-start)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--panel)';
+                }}
               >
                 Clear Filters
               </button>
               <button
                 onClick={() => setShowFilters(false)}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                className="flex-1 px-4 py-2 rounded-md transition"
+                style={{
+                  background: 'var(--brand)',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.9';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
               >
                 Apply Filters
               </button>
