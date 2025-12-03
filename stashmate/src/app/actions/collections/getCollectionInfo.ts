@@ -1,14 +1,7 @@
 'use server'
 import { createClient } from '@/lib/server'
 
-type SortableFields = 'name' | 'price' | 'cost' | 'profit' | 'source' | 'status' | 'created_at' | 'condition'
-type SortOrder = 'asc' | 'desc'
-
-export async function getItemsByCollection(
-  collectionId: number,
-  sortBy: SortableFields = 'created_at',
-  sortOrder: SortOrder = 'desc'
-) {
+export async function getCollectionInfo(collectionId: number) {
   try {
     const supabase = await createClient()
     
@@ -18,18 +11,17 @@ export async function getItemsByCollection(
       return { error: 'You must be logged in', data: null }
     }
 
-    const ascending = sortOrder === 'asc'
     const { data, error } = await supabase
-      .from('items')
-      .select('*')
-      .eq('collection_id', collectionId)
-      .order(sortBy, { ascending })
+      .from('collections')
+      .select('name, category')
+      .eq('id', collectionId)
+      .single()
 
     if (error) {
       return { error: error.message, data: null }
     }
-    
-    return { error: null, data: data || [] }
+
+    return { error: null, data }
   } catch (error) {
     return { 
       error: error instanceof Error ? error.message : 'Unknown error', 
@@ -37,3 +29,4 @@ export async function getItemsByCollection(
     }
   }
 }
+
