@@ -36,7 +36,7 @@ export async function renameCollection(formData: FormData) {
       .eq('name', newName.trim())
       .eq('owner_id', user.id) 
       .neq('id', id)
-      .maybeSingle()
+      .single()
 
     if (existingByName) {
       return { success: false, error: 'A collection with this name already exists' }

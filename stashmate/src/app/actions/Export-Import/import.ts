@@ -11,12 +11,6 @@ function toNumber(value: any, defaultValue: number = 0): number {
   return isNaN(num) ? defaultValue : num
 }
 
-function toString(value: any, defaultValue: string = ''): string {
-  if (value === null || value === undefined) {
-    return defaultValue
-  }
-  return String(value).trim()
-}
 
 // convert status text to numbers
 function statusToNumber(value: any): number {
@@ -63,8 +57,8 @@ export async function importCollectionsWithItems(csvContent: string) {
       
       if (!collections.has(key)) {
         collections.set(key, {
-          name: toString(row.collection_name),
-          category: toString(row.collection_category),
+          name: row.collection_name,
+          category: row.collection_category,
           acquired_date: row.collection_acquired_date,
           items: []
         })
@@ -78,15 +72,15 @@ export async function importCollectionsWithItems(csvContent: string) {
         const profit = (price - cost) * quantity
         
         collections.get(key).items.push({
-          name: toString(row.item_name),
-          condition: toString(row.item_condition),
+          name: row.item_name,
+          condition: row.item_condition,
           cost: cost,
           price: price,
           profit: profit,
-          source: toString(row.item_source),
+          source: row.item_source,
           status: statusToNumber(row.item_status),
           quantity: quantity,
-          image_url: toString(row.item_image_url),
+          image_url: row.item_image_url,
           created_at: new Date().toLocaleDateString('en-CA'),
         })
       }

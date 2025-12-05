@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createCollection } from "../actions/collections/createCollection";
 import { getCollections } from "../actions/collections/getCollection";
 import { deleteCollection } from "../actions/collections/deleteCollection";
-import { createItem } from "../actions/items/createItem";
+// import { createItem } from "../actions/items/createItem";
 import { exportCollectionsWithItems } from "../actions/Export-Import/export";
 import ImportButton from "./importButton";
 import ShareModal from "./ShareModal";
@@ -30,8 +30,10 @@ type Collection = {
 
 export default function AddCollectionForm({
   onSelectCollection,
+  onItemsRefresh,
 }: {
   onSelectCollection: (id: number, permission?: string) => void;
+  onItemsRefresh?: () => void;
 }) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,15 +60,15 @@ export default function AddCollectionForm({
     name: string;
   } | null>(null);
 
-  const [newItem, setNewItem] = useState({
-    name: "",
-    condition: "",
-    cost: 0,
-    price: 0,
-    profit: 0,
-    source: "",
-    collectionId: 0,
-  });
+  // const [newItem, setNewItem] = useState({
+  //   name: "",
+  //   condition: "",
+  //   cost: 0,
+  //   price: 0,
+  //   profit: 0,
+  //   source: "",
+  //   collectionId: 0,
+  // });
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [currentSelection, setCurrentSelection] = useState<number | null>(null);
@@ -202,49 +204,6 @@ export default function AddCollectionForm({
     }
   };
 
-  const handleItemChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewItem((prevItem) => ({
-      ...prevItem,
-      [name]: value,
-    }));
-  };
-
-  const handleItemSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (newItem.name && newItem.condition && newItem.cost && newItem.price) {
-      const formData = new FormData();
-      formData.append("name", newItem.name);
-      formData.append("condition", newItem.condition);
-      formData.append("cost", newItem.cost.toString());
-      formData.append("price", newItem.price.toString());
-      formData.append("profit", newItem.profit.toString());
-      formData.append("source", newItem.source);
-      formData.append("collectionId", newItem.collectionId.toString());
-
-      const result = await createItem(formData);
-
-      if (result.success) {
-        setSuccess(true);
-        setNewItem({
-          name: "",
-          condition: "",
-          cost: 0,
-          price: 0,
-          profit: 0,
-          source: "",
-          collectionId: 0,
-        });
-        await fetchCollections();
-      } else {
-        setError(result.error || "Failed to add item");
-      }
-    }
-  };
-
   return (
     <>
       {/* Collections Sidebar */}
@@ -357,9 +316,7 @@ export default function AddCollectionForm({
                             <div className="flex-shrink-0">
                               <span className="badge b-zinc text-[0.7rem] whitespace-nowrap">
                                 {col.acquired_date
-                                  ? new Date(
-                                      col.acquired_date
-                                    ).toLocaleDateString()
+                                  ? new Date(col.acquired_date).toLocaleDateString()
                                   : "No date"}
                               </span>
                             </div>
@@ -409,7 +366,12 @@ export default function AddCollectionForm({
               )}
 
               {/* Import */}
-              <ImportButton onImportComplete={fetchCollections} />
+              <ImportButton 
+                onImportComplete={async () => {
+                  await fetchCollections();
+                  onItemsRefresh?.(); 
+                }} 
+              />
 
               {/* New collection */}
               <button
@@ -444,9 +406,6 @@ export default function AddCollectionForm({
             ) : (
               <ul className="space-y-2">
                 {collections.map((col) => {
-                  const isSelected = selectedExport.includes(
-                    col.id.toString()
-                  );
                   const isMenuOpen = openMenuId === col.id;
                   const isCurrentSelection = currentSelection === col.id;
 

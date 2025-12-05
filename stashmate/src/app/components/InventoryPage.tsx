@@ -8,7 +8,6 @@ import { getCollectionOwner } from '../actions/collections/getSharedCollectionOw
 import { useState, useEffect } from "react";
 
 export default function InventoryPage({
-  onBack,
   refreshRevenue,
   revenueData,
   selectedCollectionId,
@@ -22,6 +21,7 @@ export default function InventoryPage({
 }) {
   const [currentPermission, setCurrentPermission] = useState<string | undefined>('owner');
   const [ownerName, setOwnerName] = useState<string | undefined>(undefined);
+  const [itemsRefresh, setItemsRefresh] = useState(0);
 
   useEffect(() => {
     async function fetchOwnerInfo() {
@@ -41,7 +41,10 @@ export default function InventoryPage({
 
     fetchOwnerInfo();
   }, [selectedCollectionId]);
-
+  
+  const handleItemsRefresh = () => {
+    setItemsRefresh(prev => prev + 1);
+  };
   return (
     <div
       className="flex"
@@ -53,7 +56,9 @@ export default function InventoryPage({
       <Collection onSelectCollection={(id, permission) => {
         setSelectedCollectionId(id);
         setCurrentPermission(permission);
-      }} />
+        }}
+        onItemsRefresh={handleItemsRefresh}
+      />
 
       <main
         style={{
@@ -67,6 +72,7 @@ export default function InventoryPage({
           <div className="grid" style={{ gap: "16px" }}>
             <div className="card">
               <Inventory
+                key={itemsRefresh} 
                 collectionId={selectedCollectionId}
                 onItemUpdate={refreshRevenue}
                 permission={currentPermission}

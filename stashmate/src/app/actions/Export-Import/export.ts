@@ -53,7 +53,7 @@ export async function exportCollectionsWithItems(collectionID?: string[]) {
   try {
     /* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap */
     const exportData = collections.flatMap(collection => {
-      const { id, owner_id, collection_status, collection_cond, collection_source, items, ...collectionData } = collection
+      const { id, owner_id, items, ...collectionData } = collection
       
       const collectionItems = items && items.length > 0 ? items : [null]
       
@@ -63,11 +63,7 @@ export async function exportCollectionsWithItems(collectionID?: string[]) {
         return {
           collection_name: collectionData.name,
           collection_category: collectionData.category,
-          // collection_qty: collectionData.qty,
-          // collection_cost: collectionData.cost,
-          // collection_value: collectionData.value,
           collection_acquired_date: collectionData.acquired_date,
-          // collection_profit: collectionData.profit,
           item_name: itemData.name || '',
           item_condition: itemData.condition || '',
           item_cost: itemData.cost ?? '',
