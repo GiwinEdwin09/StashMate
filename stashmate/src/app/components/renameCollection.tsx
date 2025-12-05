@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { renameCollection } from "../actions/collections/rernameCollection";
+import { renameCollection } from "../actions/collections/renameCollection";
 
 type RenameCollectionModalProps = {
   isOpen: boolean;
