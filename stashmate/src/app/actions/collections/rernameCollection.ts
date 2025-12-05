@@ -15,7 +15,7 @@ export async function renameCollection(formData: FormData) {
       return { success: false, error: 'Collection ID is required' }
     }
 
-    if (!newName || newName.trim().length === 0) {
+    if (!newName || newName.length === 0) {
       return { success: false, error: 'Collection name is required' }
     }
 
@@ -27,7 +27,7 @@ export async function renameCollection(formData: FormData) {
       return { success: false, error: 'Authentication required' }
     }
 
-    console.log('Server: Current user', user.id);
+    // console.log('Current user:', user.id);
 
     // Check if new name already exists for different collection
     const { data: existingByName } = await (await supabaseServer)
@@ -54,7 +54,7 @@ export async function renameCollection(formData: FormData) {
       .select()
       .single()
 
-    console.log('Server: Update result', { data, error });
+    // console.log('Update result:', { data, error });
 
     if (error) {
       return {error: error.message }
@@ -64,7 +64,7 @@ export async function renameCollection(formData: FormData) {
   } catch (error) {
     console.error('Rename collection error:', error)
     return { 
-      error:  'Failed to rename collection' 
+      error: 'Failed to rename collection' 
     }
   }
 }

@@ -16,9 +16,6 @@ export async function createCollection(formData: FormData) {
     return { success: false, error: 'You must be logged in' }
   }
 
-  // const { data: debugData, error: debugError } = await supabase.rpc('debug_session')
-  // console.log('DEBUG SESSION DATA:', JSON.stringify(debugData, null, 2))
-  // console.log('DEBUG ERROR:', debugError)
 
   if (!name?.trim() || !category?.trim()) {
     return { success: false, error: 'Name and category required' }
@@ -27,11 +24,6 @@ export async function createCollection(formData: FormData) {
   const insertData = {
     name: name,
     category: category,
-    // cost: 0,
-    // value: 0,
-    // profit: 0,
-    // qty: 0,
-    // status: 0,
     acquired_date: new Date().toISOString().split('T')[0],
     owner_id: user.id,
   }

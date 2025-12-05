@@ -24,6 +24,7 @@ export async function getCollectionInfo(collectionId: number) {
     return { error: null, data }
   } catch (error) {
     return { 
+      /* reference: https://omakoleg.github.io/typescript-practices/pages/topics/errors.html */
       error: error instanceof Error ? error.message : 'Unknown error', 
       data: null 
     }

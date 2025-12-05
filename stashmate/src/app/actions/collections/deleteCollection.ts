@@ -20,7 +20,7 @@ export async function deleteCollection(id: number) {
     if (error) {
         return { success: false, error: error.message }
     }
-    
+    /* https://nextjs.org/docs/app/api-reference/functions/revalidatePath */
     revalidatePath('/collections')
     return { success: true }
 }
