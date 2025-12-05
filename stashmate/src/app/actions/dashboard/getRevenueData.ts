@@ -10,90 +10,6 @@ type RevenueData = {
 
 type AggregationPeriod = 'day' | 'week' | 'month';
 
-export async function getRevenueData(
-  userId: string,
-  period: AggregationPeriod = 'day',
-  startDate?: string,
-  endDate?: string
-): Promise<RevenueData[]> {
-  const supabase = await createClient();
-
-  try {
-    // Build the query
-    let query = supabase
-      .from('items')
-      .select('created_at, profit, price, status, collection_id')
-      .eq('status', 2); // Status 2 = sold items
-
-    // Add date filters if provided
-    if (startDate) {
-      query = query.gte('created_at', startDate);
-    }
-    if (endDate) {
-      query = query.lte('created_at', endDate);
-    }
-
-    // Order by date
-    query = query.order('created_at', { ascending: true });
-
-    const { data: items, error } = await query;
-
-    if (error) {
-      console.error('Error fetching revenue data:', error);
-      throw error;
-    }
-
-    if (!items || items.length === 0) {
-      return [];
-    }
-
-    // Aggregate revenue and profit by the specified period
-    const dataByPeriod: Record<string, { revenue: number; profit: number }> = {};
-
-    items.forEach((item) => {
-      const date = new Date(item.created_at);
-      let periodKey: string;
-
-      switch (period) {
-        case 'day':
-          periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-          break;
-        case 'week':
-          const monday = new Date(date);
-          monday.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
-          periodKey = monday.toISOString().split('T')[0];
-          break;
-        case 'month':
-          periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
-          break;
-        default:
-          periodKey = date.toISOString().split('T')[0];
-      }
-
-      if (!dataByPeriod[periodKey]) {
-        dataByPeriod[periodKey] = { revenue: 0, profit: 0 };
-      }
-
-      dataByPeriod[periodKey].revenue += item.price;
-      dataByPeriod[periodKey].profit += item.profit;
-    });
-
-    // Convert to array and sort by date
-    const revenueData = Object.entries(dataByPeriod)
-      .map(([date, data]) => ({
-        date,
-        revenue: data.revenue,
-        profit: data.profit,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    return revenueData;
-  } catch (error) {
-    console.error('Failed to fetch revenue data:', error);
-    throw error;
-  }
-}
-
 /**
  * Gets revenue data for a specific collection
  * @param collectionId - The collection ID
@@ -165,48 +81,6 @@ export async function getRevenueDataByCollection(
     return revenueData;
   } catch (error) {
     console.error('Failed to fetch collection revenue data:', error);
-    throw error;
-  }
-}
-
-/**
- * Gets total revenue summary
- * @param userId - The user's ID
- * @returns Total revenue and count of sold items
- */
-export async function getRevenueSummary(userId: string) {
-  const supabase = await createClient();
-
-  try {
-    const { data: items, error } = await supabase
-      .from('items')
-      .select('profit, price')
-      .eq('status', 2); // Only sold items (status 2 = sold)
-
-    if (error) {
-      console.error('Error fetching revenue summary:', error);
-      throw error;
-    }
-
-    if (!items || items.length === 0) {
-      return {
-        totalRevenue: 0,
-        totalSales: 0,
-        averageProfit: 0,
-      };
-    }
-
-    const totalRevenue = items.reduce((sum, item) => sum + item.price, 0);
-    const totalSales = items.length;
-    const averageProfit = totalRevenue / totalSales;
-
-    return {
-      totalRevenue,
-      totalSales,
-      averageProfit,
-    };
-  } catch (error) {
-    console.error('Failed to fetch revenue summary:', error);
     throw error;
   }
 }
