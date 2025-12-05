@@ -43,44 +43,23 @@ export type Database = {
         Row: {
           acquired_date: string
           category: string
-          cond: string | null
-          cost: number
           id: number
           name: string
           owner_id: string | null
-          profit: number
-          qty: number | null
-          source: string | null
-          status: number
-          value: number
         }
         Insert: {
           acquired_date: string
           category: string
-          cond?: string | null
-          cost: number
           id?: number
           name: string
           owner_id?: string | null
-          profit?: number
-          qty?: number | null
-          source?: string | null
-          status: number
-          value: number
         }
         Update: {
           acquired_date?: string
           category?: string
-          cond?: string | null
-          cost?: number
           id?: number
           name?: string
           owner_id?: string | null
-          profit?: number
-          qty?: number | null
-          source?: string | null
-          status?: number
-          value?: number
         }
         Relationships: [
           {
@@ -147,22 +126,22 @@ export type Database = {
       }
       permissions: {
         Row: {
-          collection_id: number
+          collection_id: number | null
           id: number
-          permission_level: string
-          user_id: string
+          permission_level: string | null
+          user_id: string | null
         }
         Insert: {
-          collection_id: number
+          collection_id?: number | null
           id?: number
-          permission_level: string
-          user_id: string
+          permission_level?: string | null
+          user_id?: string | null
         }
         Update: {
-          collection_id?: number
+          collection_id?: number | null
           id?: number
-          permission_level?: string
-          user_id?: string
+          permission_level?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
