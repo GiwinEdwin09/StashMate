@@ -15,7 +15,9 @@ export default function ImportButton({onImportComplete}: ImportButtonProps) {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     
-    if (!file) return
+    if (!file) {
+      return
+    }
 
     if (!file.name.endsWith('.csv')) {
       setError('Please upload a CSV file')
