@@ -12,23 +12,26 @@ export async function getCollectionOwner(collectionId: number) {
     .eq('id', collectionId)
     .single()
 
+  // Handle case where collection doesn't exist
   if (collectionError || !collection) {
     console.error('Error fetching collection:', collectionError)
     return { error: 'Collection not found', data: null }
   }
 
-  // Get owner info from users table
+  // Get owner info from users table using owner_id
   const { data: owner, error: ownerError } = await supabase
     .from('users')
     .select('email')
     .eq('id', collection.owner_id)
     .single()
 
+  // Handle case where owner doesn't exist in users table
   if (ownerError || !owner) {
     console.error('Error fetching owner:', ownerError)
     return { error: 'Owner not found', data: null }
   }
 
+  // Return both owner ID and email for shared collection display
   return { 
     error: null, 
     data: {
