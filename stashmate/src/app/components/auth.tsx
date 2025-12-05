@@ -61,6 +61,18 @@ export default function Auth() {
     
     try {
       if (isSignUp) {
+        const { data: existingUser, error } = await supabase
+          .from('users')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+        
+        if (existingUser) {
+          setErrorMessage('An account with this email already exists. Please sign in instead.');
+          console.log('error of double sign up', error)
+          setIsLoading(false);
+          return;
+        }
         // Sign up the user with Supabase Auth
         const { error: signUpErr, data } = await supabase.auth.signUp({ 
           email, 
