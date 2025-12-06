@@ -407,7 +407,7 @@ background-color: color-mix(in srgb, var(--accent) 80%, black 20%);
 
 /* Edit Button */
 .editbutton {
-background-color: #33708a;
+background-color: #379cc7;
 border-radius: 12px;
 }
 
@@ -417,7 +417,7 @@ background-color: color-mix(in srgb, #33708a 80%, black 20%);
 
 /* Delete Button */
 .deletebutton {
-background-color: #8a3333;
+background-color: #c93939;
 border-radius: 12px;
 }
 

@@ -54,7 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav className="navbar-root">
       <header className="navbar-container">
         <div className="navbar-logo">
-          <Link href="/landing">StashMate</Link>
+          <Link href="/dashboard">StashMate</Link>
         </div>
 
         <div className="navbar-actions">
