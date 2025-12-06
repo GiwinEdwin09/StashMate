@@ -630,7 +630,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                         type="button"
                         onClick={() => handleEdit(item)}
                         disabled={isLoading || isReadOnly}
-                        className="px-3 py-2 rounded transition editbutton disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-2 rounded transition text-white editbutton disabled:opacity-50 disabled:cursor-not-allowed"
                         title={isReadOnly ? 'View-only access' : 'Edit item'}
                       >
                         Edit
@@ -639,7 +639,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
                         type="button"
                         onClick={() => handleDelete(item.id)}
                         disabled={isLoading || isReadOnly}
-                        className="px-3 py-2 rounded transition deletebutton disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-2 rounded transition text-white deletebutton disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ marginLeft: '8px' }}
                         title={isReadOnly ? 'View-only access' : 'Delete item'}
                       >

@@ -222,7 +222,7 @@ export default function AddCollectionForm({
               <button
                 onClick={() => setExportOverlay(true)}
                 disabled={isExporting || collections.length === 0}
-                className="inline-flex items-center px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer transition-colors mr-3 bg-sky-700 hover:bg-sky-800 text-white"
+                className="inline-flex items-center px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer transition-colors mr-3 bg-sky-600 hover:bg-sky-700 text-white"
                 style={{
                   opacity:
                     collections.length === 0 ? 0.6 : 1,
@@ -380,7 +380,7 @@ export default function AddCollectionForm({
                 style={{
                 }}
               >
-                <span>New</span>
+                <span>+ New</span>
               </button>
             </div>
           </div>
