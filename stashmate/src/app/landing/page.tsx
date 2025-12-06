@@ -133,12 +133,9 @@ export default function LandingPage() {
                     <span className="label">Items listed</span>
                     <span className="value">326</span>
                   </div>
-
-                  {/* Simple placeholder instead of fancy mini-chart */}
                   <div className="landing-preview-placeholder">
                     Revenue chart preview coming from your actual dashboard.
                   </div>
-
                   <p className="landing-preview-footer">
                     One view for every collection across platforms.
                   </p>

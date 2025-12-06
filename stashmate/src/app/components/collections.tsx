@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { createCollection } from "../actions/collections/createCollection";
 import { getCollections } from "../actions/collections/getCollection";
 import { deleteCollection } from "../actions/collections/deleteCollection";
-// import { createItem } from "../actions/items/createItem";
 import { exportCollectionsWithItems } from "../actions/Export-Import/export";
 import ImportButton from "./importButton";
 import ShareModal from "./ShareModal";
@@ -59,16 +58,6 @@ export default function AddCollectionForm({
     id: number;
     name: string;
   } | null>(null);
-
-  // const [newItem, setNewItem] = useState({
-  //   name: "",
-  //   condition: "",
-  //   cost: 0,
-  //   price: 0,
-  //   profit: 0,
-  //   source: "",
-  //   collectionId: 0,
-  // });
 
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [currentSelection, setCurrentSelection] = useState<number | null>(null);
@@ -217,7 +206,7 @@ export default function AddCollectionForm({
                 Create, organize, and export your sets.
               </p>
             </div>
-            {/* Open Export Overlay*/}
+            {/* Export CSV Button */}
             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
               <button
                 onClick={() => setExportOverlay(true)}
@@ -325,7 +314,7 @@ export default function AddCollectionForm({
                       })}
                     </ul>
 
-                    {/* Export Overlay Buttons */}
+                    {/* Export Overlay Buttons: Cancel, Confirm Export */}
                     <div
                       className="space"
                       style={{ marginTop: "18px", justifyContent: "flex-end" }}
@@ -365,7 +354,7 @@ export default function AddCollectionForm({
                 </div>
               )}
 
-              {/* Import */}
+              {/* Import CSV Button*/}
               <ImportButton 
                 onImportComplete={async () => {
                   await fetchCollections();
@@ -373,7 +362,7 @@ export default function AddCollectionForm({
                 }} 
               />
 
-              {/* New collection */}
+              {/* Make New Collection */}
               <button
                 onClick={() => setShowOverlay(true)}
                 className="inline-flex items-center px-3 py-1.5 text-xs rounded-xl font-medium cursor-pointer transition-colors mr-3 bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -392,7 +381,7 @@ export default function AddCollectionForm({
           )}
         </div>
 
-        {/* Collections list */}
+        {/* Sidebar Collections List */}
         <div className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto px-3 py-3">
             {isLoading ? (
@@ -533,7 +522,7 @@ export default function AddCollectionForm({
         </div>
       </aside>
 
-      {/* Add Collection Overlay */}
+      {/* Add New Collection Overlay */}
       {showOverlay && (
         <div
           className="fixed inset-0 flex justify-center items-center bg-black/60 z-50"

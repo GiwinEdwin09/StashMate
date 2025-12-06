@@ -18,8 +18,6 @@ const Navbar: React.FC<NavbarProps> = ({
   logout,
   handleBack,
   isCollectionSelected,
-  // exportButton,
-  // onExport,
   showCollectionsLink = false,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

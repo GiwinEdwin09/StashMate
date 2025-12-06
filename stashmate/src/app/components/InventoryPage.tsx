@@ -46,6 +46,7 @@ export default function InventoryPage({
     setItemsRefresh(prev => prev + 1);
   };
   return (
+    // Sidebar + Inventory
     <div
       className="flex"
       style={{

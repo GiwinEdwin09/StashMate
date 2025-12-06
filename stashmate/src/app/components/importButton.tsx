@@ -43,7 +43,6 @@ export default function ImportButton({onImportComplete}: ImportButtonProps) {
       }
     } catch (err) {
       setError('An unexpected error occurred during import')
-      // console.error(err)
       setTimeout(() => setError(null), 4000)
     } finally {
       setIsImporting(false)

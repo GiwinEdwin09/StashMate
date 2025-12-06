@@ -230,7 +230,7 @@ export default function Inventory({collectionId, onItemUpdate, permission = 'own
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '1rem', width: '100%' }}>
 
-        {/* Collections Info */}
+        {/* Collection Info */}
         <div className="flex-1 mb-4">
           <p className="font-semibold text-xl">{collectionName}</p>
           <p className="text-md text-gray-400">{collectionCategory}</p>
