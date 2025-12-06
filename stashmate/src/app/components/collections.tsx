@@ -170,14 +170,18 @@ export default function AddCollectionForm({
         setError(result.error || "Export failed");
         return;
       }
-
+      /* created a Blob object, a file-like object stored in memory */
       const blob = new Blob([result.csv], { type: "text/csv" });
+      /* Create a temp link that point to the Blob*/
       const url = window.URL.createObjectURL(blob);
+      /* create a invisible HTML link */
       const a = document.createElement("a");
+      /* Sets the download link target to the Blob URL */
       a.href = url;
       a.download = `collections-items-${
         new Date().toISOString().split("T")[0]
       }.csv`;
+      /* Adds the invisible link to the doc, then the click can be triggered */
       document.body.appendChild(a);
       a.click();
 
